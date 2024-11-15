@@ -1,0 +1,45 @@
+.equal-height-row {
+    display: flex;
+    flex-wrap: wrap;
+
+    > [class*='col-'] {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .team-item {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+        h5 {
+            font-size: 1.1rem;  // Adjust as needed
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            font-size: 0.9rem;  // Adjust as needed
+            flex-grow: 0;
+        }
+
+        img {
+            max-width: 80%;  // Adjust as needed
+            margin: 0 auto;
+        }
+
+        .btn-square {
+            width: 35px;  // Adjust as needed
+            height: 35px;  // Adjust as needed
+        }
+    }
+}
+
+// Media query for responsive design
+@media (max-width: 767px) {
+    .equal-height-row {
+        .team-item {
+            margin-bottom: 2rem;
+        }
+    }
+}

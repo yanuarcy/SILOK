@@ -1,0 +1,142 @@
+// Variables
+$primary-color: #00bfa5;
+$primary-dark: darken($primary-color, 10%);
+$primary-light: lighten($primary-color, 40%);
+$accent-color: #ffa726;
+$text-color: #333;
+$white: #fff;
+
+// Mixins
+@mixin transition($property: all, $duration: 0.3s, $timing: ease) {
+  transition: $property $duration $timing;
+}
+
+// Global styles
+body {
+//   background-color: $primary-light;
+  color: $text-color;
+  font-family: 'Roboto', sans-serif;
+}
+
+// Card styles
+.card {
+  background-color: $white;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  .card-body {
+    padding: 2rem;
+  }
+
+  .card-title {
+    color: $primary-color;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+  }
+}
+
+
+
+// Form styles
+.form-control {
+  background-color: $white;
+  border: 1px solid lighten($primary-color, 30%);
+  border-radius: 8px;
+  color: $text-color;
+  padding: 0.75rem 1rem;
+
+  &:focus {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 0.2rem rgba($primary-color, 0.25);
+  }
+}
+
+.form-label {
+  color: $primary-dark;
+  font-weight: 500;
+}
+
+// Button styles
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  @include transition;
+}
+
+.btn-primary {
+  background-color: $primary-color;
+  border-color: $primary-color;
+
+  &:hover, &:focus {
+    background-color: $primary-dark;
+    border-color: $primary-dark;
+  }
+}
+
+.btn-secondary {
+  background-color: $white;
+  border-color: $primary-color;
+  color: $primary-color;
+
+  &:hover, &:focus {
+    background-color: $primary-light;
+    border-color: $primary-color;
+    color: $primary-dark;
+  }
+}
+
+// Text styles
+.text-danger {
+  color: #ff6b6b !important;
+}
+
+// Custom styles
+.registration-form {
+    //   max-width: 500px;
+    width: 40%;
+    margin: auto;
+}
+
+.form-footer {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+
+// Untuk tablet besar dan desktop kecil
+@media (max-width: 1200px) {
+    .registration-form {
+      width: 50%;
+    }
+}
+
+// Untuk tablet
+@media (max-width: 992px) {
+    .registration-form {
+        width: 60%;
+    }
+  }
+
+// Untuk tablet kecil
+@media (max-width: 768px) {
+    .registration-form {
+        width: 75%;
+    }
+}
+
+// Untuk smartphone
+@media (max-width: 576px) {
+    .registration-form {
+        width: 90%;
+    }
+}
+
+// Untuk smartphone kecil
+@media (max-width: 400px) {
+    .registration-form {
+        width: 95%;
+    }
+}

@@ -1,0 +1,47 @@
+.equal-height-carousel {
+    .owl-stage {
+        display: flex;
+    }
+
+    .owl-item {
+        display: flex;
+        flex: 1 0 auto;
+    }
+
+    .team-item {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .team-item > * {
+        flex-shrink: 0;
+    }
+
+    .team-item > p {
+        flex-grow: 1;
+    }
+}
+
+.team-item {
+    height: 100%;  // Memastikan setiap item mengisi tinggi penuh dari owl-item
+}
+
+.teams-section {
+    .owl-nav {
+        margin-bottom: 10px;  // Menambahkan ruang antara navigasi dan tombol Read More
+    }
+
+    .btnReadMore {
+        color: #00B98E;
+        border: 1px solid #00B98E;
+        border-radius: 45px;
+        padding: 10px;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background-color: #00B98E;
+            color:#FFFFFF;
+        }
+    }
+}

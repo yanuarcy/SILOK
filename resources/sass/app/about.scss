@@ -1,0 +1,122 @@
+.read-more-page {
+    padding: 50px 0;
+    background-color: #f8f9fa;
+}
+
+.page-title {
+    color: #00a86b;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+section {
+    margin-bottom: 40px;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.feature-item {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.feature-item i {
+    color: #00a86b;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.how-it-works ol {
+    padding-left: 20px;
+}
+
+.how-it-works li {
+    margin-bottom: 10px;
+}
+
+.benefits ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.benefits li:before {
+    content: "✓";
+    color: #00a86b;
+    margin-right: 10px;
+}
+
+.cta {
+    background-color: #e9ecef;
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: #00a86b;
+    border-color: #00a86b;
+    padding: 10px 20px;
+    font-size: 18px;
+}
+
+.btn-primary:hover {
+    background-color: #008f5a;
+    border-color: #008f5a;
+}
+
+// Custom variables
+$primary: #10B981;
+$secondary: #64748B;
+
+// Custom styles
+.silok-info {
+    background: linear-gradient(135deg, #F0FDF4 0%, #D1FAE5 100%);
+
+    h1, h2 {
+        color: $primary;
+    }
+
+    .feature-card, .benefit-card {
+        transition: transform 0.3s ease-in-out;
+        &:hover {
+            transform: translateY(-5px);
+        }
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        color: $primary;
+        margin-bottom: 1rem;
+    }
+
+    .benefit-icon {
+        font-size: 1.5rem;
+        color: $primary;
+        margin-right: 0.5rem;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: lighten($primary, 45%);
+        color: $primary;
+    }
+
+    .btn-primary {
+        background-color: $primary;
+        border-color: $primary;
+        &:hover {
+            background-color: darken($primary, 10%);
+            border-color: darken($primary, 10%);
+        }
+    }
+}

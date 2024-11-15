@@ -1,0 +1,112 @@
+.layanan-item {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.layanan-image-wrapper {
+    width: 100%;
+    height: 200px; /* Sesuaikan tinggi ini sesuai kebutuhan */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.layanan-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+a:hover .layanan-item {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    background-color: #00bcd4;
+    border-color: #008ba3;
+}
+
+a:hover .layanan-item h5,
+a:hover .layanan-item p,
+a:hover .layanan-item small {
+    color: #ffffff;
+}
+
+a:hover .layanan-image {
+    transform: scale(1.05);
+}
+
+.layanan-item h5 {
+    color: #00bcd4;
+    margin-bottom: 10px;
+}
+
+.layanan-item p {
+    color: #333;
+    margin-bottom: 10px;
+    flex-grow: 1;
+}
+
+.layanan-item small {
+    display: block;
+    font-style: italic;
+    color: #6c757d;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+}
+
+.btn-primary {
+    background-color: #00bcd4;
+    border-color: #00bcd4;
+}
+
+.btn-primary:hover {
+    background-color: #008c9e;
+    border-color: #008c9e;
+}
+
+.alert-info {
+    background-color: #e1f5fe;
+    border-color: #b3e5fc;
+    color: #01579b;
+}
+
+.alert-info hr {
+    border-top-color: #01579b;
+}
+
+.btn-outline-primary {
+    color: #00bcd4;
+    border-color: #00bcd4;
+}
+
+.btn-outline-primary:hover {
+    background-color: #00bcd4;
+    color: white;
+}
+
+
+.card-img-top {
+    width: 100%;
+    height: 200px; /* Adjust this value as needed */
+    object-fit: cover;
+}
+
+.card-img-top-sub {
+    width: 100%;
+    height: 200px; /* Adjust this value as needed */
+    object-fit: cover;
+}
