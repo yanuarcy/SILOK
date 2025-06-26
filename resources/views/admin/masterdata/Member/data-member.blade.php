@@ -246,6 +246,7 @@
                                     <thead>
                                         <tr>
                                             <th>No</th>
+                                            <th>Image</th>
                                             <th>ID</th>
                                             <th>Name</th>
                                             <th>Email</th>
@@ -329,6 +330,7 @@
 
     <script>
         $(document).ready(function() {
+            const isAdmin = {{ auth()->check() && auth()->user()->role === 'admin' ? 'true' : 'false' }};
             // Initialize DataTable
             const table = $('#members-table').DataTable({
                 processing: true,
@@ -341,6 +343,13 @@
                         render: function (data, type, row, meta) {
                             return meta.row + meta.settings._iDisplayStart + 1;
                         }
+                    },
+                    {
+                        data: 'image',
+                        name: 'image',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center'
                     },
                     {
                         data: 'id',
@@ -514,7 +523,7 @@
                             return '-';
                         }
                     },
-                    {data: 'actions', orderable: false, searchable: false}
+                    {data: 'actions', orderable: false, searchable: false, visible: isAdmin}
                 ],
                 drawCallback: function() {
                     // Inisialisasi tooltip bootstrap

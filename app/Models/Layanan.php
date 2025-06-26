@@ -9,7 +9,7 @@ class Layanan extends Model
     protected $table = 'layanan';
 
     protected $fillable = [
-        'slug', 'title', 'image', 'description', 'small', 'has_sub_layanan'
+        'slug', 'kode_layanan', 'title', 'image', 'description', 'small', 'has_sub_layanan'
     ];
 
     protected $casts = [

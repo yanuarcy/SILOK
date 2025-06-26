@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('layanan', function (Blueprint $table) {
             $table->id();
             $table->string('slug')->unique();
+            $table->char('kode_layanan', 1)->unique()->nullable();
             $table->string('title');
             $table->string('image');
             $table->text('description');

@@ -291,6 +291,8 @@
 
     <script>
         $(document).ready(function() {
+            const isAuthorized = {{ auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator') ? 'true' : 'false' }};
+
             const table = $('#sub-layanan-table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -337,7 +339,8 @@
                         data: 'actions',
                         name: 'actions',
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+                        visible: isAuthorized
                     }
                 ],
                 responsive: true,

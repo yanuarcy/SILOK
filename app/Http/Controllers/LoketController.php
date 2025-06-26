@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use DataTables;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 
 class LoketController extends Controller
@@ -64,6 +65,8 @@ class LoketController extends Controller
                     $isOnline = $loket->isOnline();
                     $statusClass = $isOnline ? 'success' : 'secondary';
                     $status = $isOnline ? 'Online' : 'Offline';
+                    $loket->status = $status;
+                    $loket->save();
                     return '<span class="badge bg-' . $statusClass . '">' . $status . '</span>';
                 })
                 ->editColumn('call_status', function ($loket) {
@@ -71,21 +74,68 @@ class LoketController extends Controller
                     return '<span class="badge bg-' . $callStatusClass . '">' . ucfirst($loket->call_status) . '</span>';
                 })
                 ->editColumn('is_active', function ($loket) {
+                    // Cek apakah user tidak aktif lebih dari 30 hari
+                    $lastSeen = Cache::get('user-last-seen.'.$loket->user_id);
+
+                    if ($lastSeen) {
+                        $timestamp = is_object($lastSeen) ? $lastSeen->timestamp : strtotime($lastSeen);
+                        $now = time();
+                        $diffDays = ($now - $timestamp) / 86400;
+
+                        // Jika tidak aktif lebih dari 30 hari, update status is_active di database
+                        if ($diffDays > 30 && $loket->is_active) {
+                            $loket->is_active = false;
+                            $loket->save();
+                        }
+                    }
+
+                    // Tampilkan status setelah pengecekan
                     $activeClass = $loket->is_active ? 'success' : 'danger';
                     return '<span class="badge bg-' . $activeClass . '">' .
                         ($loket->is_active ? 'Aktif' : 'Nonaktif') . '</span>';
                 })
                 ->editColumn('last_activity', function ($loket) {
-                    $lastActivity = $loket->getLastActivityAttribute();
-                    return $lastActivity ? $lastActivity : '-';
+                    // $lastActivity = $loket->getLastActivityAttribute();
+                    // return $lastActivity ? '-' : $lastActivity;
+
+                    // Cek status online dari cache
+                    $isOnline = Cache::has('user-online.'.$loket->user_id);
+
+                    if ($isOnline) {
+                        return '<span class="badge bg-success rounded-pill">Online</span>';
+                    }
+
+                    // Ambil last_seen dari cache - jika tidak ada, tampilkan "Belum pernah login"
+                    $lastSeen = Cache::get('user-last-seen.'.$loket->user_id);
+                    if (!$lastSeen) {
+                        return '<span class="badge bg-secondary rounded-pill">Belum pernah login</span>';
+                    }
+
+                    // Konversi waktu terakhir dilihat ke dalam format yang sederhana tanpa error
+                    $timestamp = is_object($lastSeen) ? $lastSeen->timestamp : strtotime($lastSeen);
+                    $now = time();
+                    $diff = $now - $timestamp;
+
+                    // Format tampilan waktu
+                    if ($diff < 60) {
+                        $time = $diff . ' detik yang lalu';
+                    } elseif ($diff < 3600) {
+                        $time = floor($diff / 60) . ' menit yang lalu';
+                    } elseif ($diff < 86400) {
+                        $time = floor($diff / 3600) . ' jam yang lalu';
+                    } else {
+                        $time = floor($diff / 86400) . ' hari yang lalu';
+                    }
+
+                    return '<span class="badge bg-danger rounded-pill">' . $time . '</span>';
                 })
                 ->addColumn('actions', function($loket) {
                     return '
                         <div class="d-flex justify-content-center gap-2">
-                            <a href="'.route('lokets.edit', $loket->id).'" class="btn btn-warning btn-sm">
+                            <a href="'.route('Loket.edit', $loket->id).'" class="btn btn-warning btn-sm">
                                 <i class="fas fa-pencil-alt"></i>
                             </a>
-                            <form action="'.route('lokets.destroy', $loket->id).'" method="POST" class="delete-form">
+                            <form action="'.route('Loket.destroy', $loket->id).'" method="POST" class="delete-form">
                                 '.csrf_field().'
                                 '.method_field('DELETE').'
                                 <button type="submit" class="btn btn-danger btn-sm btn-delete" data-name="'.$loket->user->name.'">
@@ -95,7 +145,7 @@ class LoketController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['status', 'call_status', 'is_active', 'actions'])
+                ->rawColumns(['status', 'call_status', 'is_active', 'actions', 'last_activity'])
                 ->make(true);
         } catch (\Exception $e) {
             \Log::error('Loket DataTables Error: ' . $e->getMessage());

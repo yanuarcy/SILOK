@@ -886,22 +886,95 @@ class LayananController extends Controller
         return view('admin.masterdata.Layanan.create', ['type_menu' => 'master-data']);
     }
 
+    public function checkKode(Request $request)
+    {
+        try {
+            $kode = strtoupper($request->kode);
+            $excludeId = $request->exclude_id; // Untuk edit, exclude layanan saat ini
+
+            if (empty($kode)) {
+                return response()->json([
+                    'available' => false,
+                    'message' => 'Kode layanan tidak boleh kosong'
+                ], 400);
+            }
+
+            // Validasi format kode (harus A-Z)
+            if (!preg_match('/^[A-Z]$/', $kode)) {
+                return response()->json([
+                    'available' => false,
+                    'message' => 'Kode layanan harus berupa huruf A-Z'
+                ], 400);
+            }
+
+            // Query dengan exclude ID jika ada (untuk edit)
+            $query = Layanan::where('kode_layanan', $kode);
+
+            if ($excludeId) {
+                $query->where('id', '!=', $excludeId);
+                \Log::info('Excluding layanan ID from check', ['exclude_id' => $excludeId]);
+            }
+
+            $existingLayanan = $query->first();
+
+            if ($existingLayanan) {
+                \Log::info('Kode already used', [
+                    'kode' => $kode,
+                    'used_by_id' => $existingLayanan->id,
+                    'used_by_title' => $existingLayanan->title
+                ]);
+
+                return response()->json([
+                    'available' => false,
+                    'used_by' => $existingLayanan->title,
+                    'layanan_id' => $existingLayanan->id,
+                    'message' => "Kode {$kode} sudah digunakan untuk layanan: {$existingLayanan->title}"
+                ]);
+            } else {
+                \Log::info('Kode available', ['kode' => $kode]);
+
+                return response()->json([
+                    'available' => true,
+                    'message' => "Kode {$kode} tersedia untuk digunakan"
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Error checking kode: ' . $e->getMessage());
+            return response()->json([
+                'available' => false,
+                'error' => 'Terjadi kesalahan saat mengecek kode: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         try {
             \Log::info('Request data:', $request->all());  // Tambahkan logging untuk debugging
 
+            // ✅ VALIDASI 1: Cek duplikasi title
             $existingLayanan = Layanan::where('title', $request->title)->first();
             if ($existingLayanan) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Title layanan sudah terdaftar!'
+                    'message' => 'Title layanan "' . $request->title . '" sudah terdaftar!'
                 ], 422);
             }
 
-            // Validasi dasar terlebih dahulu
+            // ✅ VALIDASI 2: Cek duplikasi kode layanan
+            $existingKode = Layanan::where('kode_layanan', $request->kode_layanan)->first();
+            if ($existingKode) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode layanan "' . $request->kode_layanan . '" sudah digunakan untuk layanan: ' . $existingKode->title
+                ], 422);
+            }
+
+            // ✅ VALIDASI 3: Laravel validation rules
             $mainValidation = $request->validate([
-                'title' => 'required|string|max:255',
+                'title' => 'required|string|max:255|unique:layanan,title',
+                'kode_layanan' => 'required|string|size:1|unique:layanan,kode_layanan',
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'description' => 'required|string',
                 'small' => 'required|string|max:255',
@@ -964,6 +1037,7 @@ class LayananController extends Controller
                 $layanan = Layanan::create([
                     'title' => $request->title,
                     'slug' => Str::slug($request->title),
+                    'kode_layanan' => strtoupper($request->kode_layanan), // Pastikan uppercase
                     'image' => $newImageName,
                     'description' => $request->description,
                     'small' => $request->small,
@@ -1027,7 +1101,13 @@ class LayananController extends Controller
                 \DB::commit();
                 return response()->json([
                     'success' => true,
-                    'message' => 'Layanan berhasil ditambahkan!'
+                    'message' => 'Layanan berhasil ditambahkan!',
+                    'data' => [
+                        'id' => $layanan->id,
+                        'title' => $layanan->title,
+                        'kode_layanan' => $layanan->kode_layanan,
+                        'slug' => $layanan->slug
+                    ]
                 ]);
 
                 // return redirect()->route('masterdata.layanan')
@@ -1052,9 +1132,73 @@ class LayananController extends Controller
         }
     }
 
+    /**
+     * Method untuk mendapatkan mapping kode layanan yang sudah digunakan
+     */
+    public function getKodeMapping()
+    {
+        try {
+            $layananMapping = Layanan::select('title', 'kode_layanan')
+                ->whereNotNull('kode_layanan')
+                ->orderBy('kode_layanan')
+                ->get()
+                ->keyBy('title')
+                ->map(function($item) {
+                    return $item->kode_layanan;
+                })
+                ->toArray();
+
+            return response()->json([
+                'success' => true,
+                'data' => $layananMapping
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error getting kode mapping: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data mapping'
+            ], 500);
+        }
+    }
+
+    /**
+     * Method untuk mendapatkan kode layanan yang tersedia
+     */
+    public function getAvailableKodes()
+    {
+        try {
+            $usedKodes = Layanan::whereNotNull('kode_layanan')
+                ->pluck('kode_layanan')
+                ->toArray();
+
+            $allKodes = range('A', 'Z');
+            $availableKodes = array_diff($allKodes, $usedKodes);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'used' => $usedKodes,
+                    'available' => array_values($availableKodes),
+                    'total_used' => count($usedKodes),
+                    'total_available' => count($availableKodes)
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error getting available kodes: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data kode'
+            ], 500);
+        }
+    }
+
     public function getData(Request $request)
     {
         $query = Layanan::all();
+
+        $isAuthorized = auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator');
 
         return DataTables::of($query)
             ->addIndexColumn()
@@ -1067,7 +1211,11 @@ class LayananController extends Controller
             ->editColumn('created_at', function($layanan) {
                 return $layanan->created_at->format('d F Y');
             })
-            ->addColumn('actions', function($layanan) {
+            ->addColumn('actions', function($layanan) use ($isAuthorized) {
+                if (!$isAuthorized) {
+                    return '';
+                }
+
                 return '
                     <div class="d-flex justify-content-center gap-2">
                         <a href="'.route('layanan.edit', $layanan->id).'" class="btn btn-warning btn-sm">
@@ -1099,6 +1247,50 @@ class LayananController extends Controller
     public function update(Request $request, $id)
     {
         try {
+
+            $layanan = Layanan::findOrFail($id);
+
+            // Validasi kode layanan tidak boleh duplikat (kecuali milik sendiri)
+            if ($request->kode_layanan !== $layanan->kode_layanan) {
+                $existingKode = Layanan::where('kode_layanan', $request->kode_layanan)
+                    ->where('id', '!=', $id)
+                    ->first();
+                if ($existingKode) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Kode layanan ' . $request->kode_layanan . ' sudah digunakan untuk layanan: ' . $existingKode->title
+                    ], 422);
+                }
+            }
+
+            // Validasi title tidak boleh duplikat (kecuali milik sendiri)
+            if ($request->title !== $layanan->title) {
+                $existingLayanan = Layanan::where('title', $request->title)
+                    ->where('id', '!=', $id)
+                    ->first();
+                if ($existingLayanan) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Title layanan sudah terdaftar!'
+                    ], 422);
+                }
+            }
+
+            $validationRules = [
+                'title' => 'required|string|max:255',
+                'kode_layanan' => 'required|string|size:1',
+                'description' => 'required|string',
+                'small' => 'required|string|max:255',
+                'has_sub_layanan' => 'boolean',
+            ];
+
+            // Image optional pada update
+            if ($request->hasFile('image')) {
+                $validationRules['image'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:2048';
+            }
+
+            $request->validate($validationRules);
+
             DB::beginTransaction();
 
             $layanan = Layanan::findOrFail($id);
@@ -1125,10 +1317,20 @@ class LayananController extends Controller
                 $layanan->image = $imageName;
             }
 
-            $layanan->title = $request->title;
-            $layanan->description = $request->description;
-            $layanan->small = $request->small;
-            $layanan->has_sub_layanan = $request->boolean('has_sub_layanan');
+            // $layanan->title = $request->title;
+            // $layanan->description = $request->description;
+            // $layanan->small = $request->small;
+            // $layanan->has_sub_layanan = $request->boolean('has_sub_layanan');
+
+            $updateData = [
+                'title' => $request->title,
+                'slug' => Str::slug($request->title),
+                'kode_layanan' => strtoupper($request->kode_layanan),
+                'description' => $request->description,
+                'small' => $request->small,
+                'has_sub_layanan' => $request->boolean('has_sub_layanan')
+            ];
+             $layanan->update($updateData);
             $layanan->save();
 
             // Only handle sub layanan if has_sub_layanan is true

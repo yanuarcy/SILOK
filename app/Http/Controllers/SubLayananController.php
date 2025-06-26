@@ -18,8 +18,14 @@ class SubLayananController extends Controller
     {
         $query = SubLayanan::with('layanan');
 
+        $isAuthorized = auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator');
+
         return DataTables::of($query)
-            ->addColumn('actions', function($subLayanan) {
+            ->addColumn('actions', function($subLayanan) use ($isAuthorized) {
+                if (!$isAuthorized) {
+                    return '';
+                }
+
                 return '
                     <div class="d-flex justify-content-center gap-2">
                         <a href="'.route('sub-layanan.edit', $subLayanan->id).'" class="btn btn-warning btn-sm">

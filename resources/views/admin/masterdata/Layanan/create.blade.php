@@ -74,15 +74,59 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Image</label>
+                                            <label>Kode Layanan <span class="text-danger">*</span></label>
+                                            <select class="form-control @error('kode_layanan') is-invalid @enderror"
+                                                    name="kode_layanan" id="kodeLayanan" required>
+                                                <option value="">Pilih Kode Layanan</option>
+                                                @foreach(range('A', 'Z') as $letter)
+                                                    <option value="{{ $letter }}" {{ old('kode_layanan') == $letter ? 'selected' : '' }}>
+                                                        {{ $letter }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('kode_layanan')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div id="kodeInfo" class="kode-info" style="display: none;">
+                                                <small><i class="fas fa-info-circle"></i> Informasi kode layanan akan ditampilkan di sini</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Image <span class="text-danger">*</span></label>
                                             <input type="file" class="form-control @error('image') is-invalid @enderror"
-                                                   name="image" required>
+                                                   name="image" required accept="image/*">
                                             @error('image')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <small class="form-text text-muted">Format: JPEG, PNG, JPG, GIF, SVG. Max: 2MB</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Small Text <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control @error('small') is-invalid @enderror"
+                                                   name="small" value="{{ old('small') }}" required
+                                                   placeholder="Teks pendek untuk deskripsi singkat">
+                                            @error('small')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
                                 </div>
+                                {{-- <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Image</label>
+                                        <input type="file" class="form-control @error('image') is-invalid @enderror"
+                                               name="image" required>
+                                        @error('image')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div> --}}
 
                                 <div class="form-group">
                                     <label>Description</label>
@@ -93,14 +137,14 @@
                                     @enderror
                                 </div>
 
-                                <div class="form-group">
+                                {{-- <div class="form-group">
                                     <label>Small Text</label>
                                     <input type="text" class="form-control @error('small') is-invalid @enderror"
                                            name="small" value="{{ old('small') }}" required>
                                     @error('small')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div>
+                                </div> --}}
 
                                 <div class="form-group">
                                     <div class="custom-control custom-checkbox">
@@ -164,6 +208,77 @@
     <script src="{{ asset('js/page/index-0.js') }}"></script>
     <script>
         $(document).ready(function() {
+            // Check kode layanan availability
+            let checkKodeTimeout;
+            $('#kodeLayanan').change(function() {
+                const selectedKode = $(this).val();
+                const infoDiv = $('#kodeInfo');
+
+                // Clear previous timeout
+                clearTimeout(checkKodeTimeout);
+
+                if (selectedKode) {
+                    // Show loading state
+                    infoDiv.removeClass('kode-unavailable kode-available');
+                    infoDiv.html(`
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <small>Memeriksa ketersediaan kode ${selectedKode}...</small>
+                    `);
+                    infoDiv.show();
+
+                    // Debounce untuk menghindari request berlebihan
+                    checkKodeTimeout = setTimeout(function() {
+                        $.ajax({
+                            url: '{{ route("layanan.checkKode") }}',
+                            method: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                kode: selectedKode
+                            },
+                            success: function(response) {
+                                console.log('Check kode response:', response); // Debug log
+
+                                if (response.available) {
+                                    infoDiv.removeClass('kode-unavailable').addClass('kode-available');
+                                    infoDiv.html(`
+                                        <i class="fas fa-check-circle"></i>
+                                        <strong class="text-success">Kode ${selectedKode} tersedia</strong><br>
+                                        <small>Kode ini dapat digunakan untuk layanan baru</small>
+                                    `);
+                                } else {
+                                    infoDiv.removeClass('kode-available').addClass('kode-unavailable');
+                                    infoDiv.html(`
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <strong class="text-danger">Kode ${selectedKode} sudah digunakan</strong><br>
+                                        <small>Digunakan untuk: <strong>${response.used_by || 'Layanan tidak diketahui'}</strong></small>
+                                    `);
+                                }
+                                infoDiv.show();
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error checking kode:', xhr.responseJSON); // Debug log
+
+                                infoDiv.removeClass('kode-available').addClass('kode-unavailable');
+                                let errorMessage = 'Tidak dapat memeriksa ketersediaan kode';
+
+                                if (xhr.responseJSON && xhr.responseJSON.message) {
+                                    errorMessage = xhr.responseJSON.message;
+                                }
+
+                                infoDiv.html(`
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Error:</strong><br>
+                                    <small>${errorMessage}</small>
+                                `);
+                                infoDiv.show();
+                            }
+                        });
+                    }, 500); // 500ms debounce
+                } else {
+                    infoDiv.hide();
+                }
+            });
+
             // Show/hide sub layanan section based on checkbox
             $('#hasSubLayanan').change(function() {
                 $('#subLayananSection').toggle(this.checked);
@@ -270,37 +385,200 @@
             });
 
             // Form submission dengan SweetAlert
-            $('form').on('submit', function(e) {
+            // $('form').on('submit', function(e) {
+            //     e.preventDefault();
+
+            //     // Validate kode layanan
+            //     const selectedKode = $('#kodeLayanan').val();
+            //     if (!selectedKode) {
+            //         Swal.fire({
+            //             icon: 'error',
+            //             title: 'Oops...',
+            //             text: 'Kode layanan harus dipilih!'
+            //         });
+            //         return;
+            //     }
+
+            //     const form = $(this);
+            //     const formData = new FormData(this);
+
+            //     // Show loading
+            //     Swal.fire({
+            //         title: 'Menyimpan Data...',
+            //         text: 'Mohon tunggu sebentar',
+            //         allowOutsideClick: false,
+            //         didOpen: () => {
+            //             Swal.showLoading()
+            //         }
+            //     });
+
+            //     $.ajax({
+            //         url: form.attr('action'),
+            //         method: 'POST',
+            //         data: formData,
+            //         processData: false,
+            //         contentType: false,
+            //         success: function(response) {
+            //             Swal.fire({
+            //                 icon: 'success',
+            //                 title: 'Berhasil!',
+            //                 text: response.message,
+            //                 showConfirmButton: false,
+            //                 timer: 1500
+            //             }).then(() => {
+            //                 window.location.href = "{{ route('masterdata.layanan') }}";
+            //             });
+            //         },
+            //         error: function(xhr) {
+            //             let message = 'Terjadi kesalahan!';
+            //             if (xhr.responseJSON && xhr.responseJSON.message) {
+            //                 message = xhr.responseJSON.message;
+            //             }
+            //             Swal.fire({
+            //                 icon: 'error',
+            //                 title: 'Oops...',
+            //                 text: message
+            //             });
+            //         }
+            //     });
+            // });
+
+            $('#layananForm').on('submit', function(e) {
                 e.preventDefault();
+
+                console.log('Form submitted'); // Debug log
+
+                // ✅ Validasi kode layanan
+                const selectedKode = $('#kodeLayanan').val();
+                if (!selectedKode) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Kode Layanan Required!',
+                        text: 'Silakan pilih kode layanan terlebih dahulu!',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                // ✅ Validasi apakah kode tersedia
+                if ($('#kodeInfo').hasClass('kode-unavailable')) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Kode Layanan Tidak Tersedia!',
+                        text: 'Kode yang dipilih sudah digunakan. Silakan pilih kode lain!',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
                 const form = $(this);
                 const formData = new FormData(this);
 
+                console.log('FormData prepared'); // Debug log
+
+                // ✅ Show loading dengan lebih detail
+                Swal.fire({
+                    title: 'Menyimpan Data...',
+                    html: `
+                        <div class="text-center">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <p>Mohon tunggu, data sedang diproses...</p>
+                        </div>
+                    `,
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // ✅ AJAX Request dengan enhanced error handling
                 $.ajax({
                     url: form.attr('action'),
                     method: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
+                    timeout: 30000, // 30 seconds timeout
+                    beforeSend: function() {
+                        console.log('AJAX request started'); // Debug log
+                    },
                     success: function(response) {
+                        console.log('AJAX success response:', response); // Debug log
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil!',
-                            text: response.message,
+                            html: `
+                                <div class="text-center">
+                                    <p><strong>${response.message}</strong></p>
+                                    ${response.data ? `
+                                        <div class="mt-3 p-3 bg-light rounded">
+                                            <small class="text-muted">
+                                                <strong>ID:</strong> ${response.data.id}<br>
+                                                <strong>Kode:</strong> ${response.data.kode_layanan}<br>
+                                                <strong>Slug:</strong> ${response.data.slug}
+                                            </small>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `,
                             showConfirmButton: false,
-                            timer: 1500
+                            timer: 2000
                         }).then(() => {
                             window.location.href = "{{ route('masterdata.layanan') }}";
                         });
                     },
-                    error: function(xhr) {
-                        let message = 'Terjadi kesalahan!';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            message = xhr.responseJSON.message;
+                    error: function(xhr, status, error) {
+                        console.error('AJAX error:', {xhr: xhr, status: status, error: error}); // Debug log
+                        console.error('Response:', xhr.responseJSON); // Debug log
+
+                        let title = 'Oops...';
+                        let message = 'Terjadi kesalahan yang tidak diketahui!';
+                        let icon = 'error';
+
+                        if (xhr.status === 422) {
+                            // Validation errors
+                            title = 'Validasi Gagal!';
+                            icon = 'warning';
+
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                const errors = xhr.responseJSON.errors;
+                                message = '<ul class="text-left">';
+                                Object.keys(errors).forEach(function(key) {
+                                    errors[key].forEach(function(errorMsg) {
+                                        message += `<li>${errorMsg}</li>`;
+                                    });
+                                });
+                                message += '</ul>';
+                            }
+                        } else if (xhr.status === 500) {
+                            // Server errors
+                            title = 'Server Error!';
+                            message = xhr.responseJSON && xhr.responseJSON.message
+                                ? xhr.responseJSON.message
+                                : 'Terjadi kesalahan pada server. Silakan coba lagi.';
+                        } else if (xhr.status === 0) {
+                            // Network errors
+                            title = 'Koneksi Error!';
+                            message = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+                        } else {
+                            // Other errors
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
                         }
+
                         Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: message
+                            icon: icon,
+                            title: title,
+                            html: message,
+                            confirmButtonText: 'OK',
+                            footer: `<small class="text-muted">Status: ${xhr.status} ${xhr.statusText}</small>`
                         });
                     }
                 });

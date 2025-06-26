@@ -1,13 +1,77 @@
+@php
+    include_once app_path('Helpers/GeneralSettings.php');
+@endphp
+
+<style>
+    /* Badge notification styling */
+    .nav-item .badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-weight: 600;
+        min-width: 18px;
+        text-align: center;
+    }
+
+    /* Animation untuk badge baru */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .badge-pulse {
+        animation: pulse 2s infinite;
+    }
+
+    /* Badge di dropdown menu */
+    .dropdown-menu .nav-link .badge {
+        font-size: 9px;
+        padding: 1px 5px;
+        margin-left: 5px;
+    }
+
+    /* Hover effect untuk menu dengan notifikasi */
+    .nav-item.dropdown:hover .badge {
+        background-color: #fff !important;
+        color: #17a2b8 !important;
+    }
+
+    /* Badge warna untuk surat masuk */
+    .badge-success {
+        background: linear-gradient(45deg, #28a745, #20c997) !important;
+    }
+
+    .badge-info {
+        background: linear-gradient(45deg, #17a2b8, #007bff) !important;
+    }
+
+    /* Responsiveness untuk mobile */
+    @media (max-width: 768px) {
+        .nav-item .badge {
+            font-size: 9px;
+            padding: 1px 4px;
+            min-width: 16px;
+        }
+    }
+</style>
+
 <div class="main-sidebar sidebar-style-2">
     <aside id="sidebar-wrapper">
         <div class="sidebar-brand">
-            <a href="index.html">Silok</a>
+            <a href="index.html">{{ getSiteName() }}</a>
         </div>
         <div class="sidebar-brand sidebar-brand-sm">
             <a href="index.html">Sl</a>
         </div>
         <ul class="sidebar-menu">
-            <li class="menu-header">Dashboard</li>
+            <li class="menu-header">Overview</li>
             <li class="nav-item dropdown {{ $type_menu === 'dashboard' ? 'active' : '' }}">
                 <a href="#"
                     class="nav-link has-dropdown"><i class="fas fa-fire"></i><span>Dashboard</span></a>
@@ -16,433 +80,327 @@
                         <a class="nav-link"
                             href="{{ route('Dashboard.General') }}">General Dashboard</a>
                     </li>
-                    <li class="{{ Request::is('Dashboard/Front-Office') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ route('Dashboard.FrontOffice') }}">Front-Office Dashboard</a>
-                    </li>
-                </ul>
-            </li>
-            <li class="menu-header">Features</li>
-            <li class="nav-item dropdown {{ $type_menu === 'master-data' ? 'active' : '' }}">
-                <a href="#"
-                    class="nav-link has-dropdown"
-                    data-toggle="dropdown"><i class="fas fa-database"></i> <span>Master Data</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{{ Request::is('Master-Data/Member') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ route('Member.index') }}">Data Member</a>
-                    </li>
-                    <li class="nav-item dropdown {{ Request::is('Master-Data/Data-Layanan') ? 'active' : '' }}">
-                        <a class="nav-link has-dropdown"
-                        data-toggle="dropdown" href="#"><span>Data Layanan</span></a>
-                        <ul class="dropdown-menu">
-                            <li class="{{ Request::is('Master-Data/Data-Layanan/Layanan', 'admin/layanan/create') ? 'active' : '' }}">
-                                <a class="nav-link"
-                                    href="{{ route('masterdata.layanan') }}">Layanan</a>
-                            </li>
-                            <li class="{{ Request::is('Master-Data/Data-Layanan/sub-layanan') ? 'active' : '' }}">
-                                <a class="nav-link"
-                                    href="{{ route('masterdata.sub-layanan') }}">Sub Layanan</a>
-                            </li>
-                            <li class="{{ Request::is('Master-Data/Data-Layanan/layanan-item') ? 'active' : '' }}">
-                                <a class="nav-link"
-                                    href="{{ route('masterdata.layanan-item') }}">Sub Layanan Item</a>
-                            </li>
-                            <li class="{{ Request::is('Master-Data/Member') ? 'active' : '' }}">
-                                <a class="nav-link"
-                                    href="{{ route('masterdata.kategori-pendaftaran') }}">Kategori Pendaftaran</a>
-                            </li>
-                            <li class="{{ Request::is('Master-Data/Member') ? 'active' : '' }}">
-                                <a class="nav-link"
-                                    href="{{ route('masterdata.kategori-pemohon') }}">Kategori Pemohon</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="{{ Request::is('Master-Data/Loket') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ route('masterdata.loket') }}">Data Loket</a>
-                    </li>
-                    <li class="{{ Request::is('Master-Data/ApiWhatsapp') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ route('masterdata.apiWhatsapp') }}">Data Api Whatsapp</a>
-                    </li>
-                    <li class="{{ Request::is('Master-Data/Antarmuka') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ route('masterdata.antarmuka') }}">Data Antarmuka</a>
-                    </li>
-                    <li class="{{ Request::is('Master-Data/Pemohon') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ route('masterdata.pemohon') }}">Data Pemohon</a>
-                    </li>
-                </ul>
-            </li>
-            <li class="menu-header">Starter</li>
-            <li class="nav-item dropdown {{ $type_menu === 'layout' ? 'active' : '' }}">
-                <a href="#"
-                    class="nav-link has-dropdown"
-                    data-toggle="dropdown"><i class="fas fa-columns"></i> <span>Layout</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{{ Request::is('layout-default-layout') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('layout-default-layout') }}">Default Layout</a>
-                    </li>
-                    <li class="{{ Request::is('transparent-sidebar') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('transparent-sidebar') }}">Transparent Sidebar</a>
-                    </li>
-                    <li class="{{ Request::is('layout-top-navigation') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('layout-top-navigation') }}">Top Navigation</a>
-                    </li>
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator' || auth()->user()->role === 'Front Office'))
+                        <li class="{{ Request::is('Dashboard/Front-Office') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('Dashboard.FrontOffice') }}">Front-Office Dashboard</a>
+                        </li>
+                    @endif
                 </ul>
             </li>
             <li class="{{ Request::is('blank-page') ? 'active' : '' }}">
                 <a class="nav-link"
-                    href="{{ route('home') }}"><i class="far fa-square"></i> <span>Home</span></a>
+                    href="{{ route('home') }}"><i class="fas fa-home"></i> <span>Home</span></a>
             </li>
-            <li class="nav-item dropdown {{ $type_menu === 'bootstrap' ? 'active' : '' }}">
-                <a href="#"
-                    class="nav-link has-dropdown"><i class="fas fa-th"></i> <span>Bootstrap</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{{ Request::is('bootstrap-alert') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-alert') }}">Alert</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-badge') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-badge') }}">Badge</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-breadcrumb') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-breadcrumb') }}">Breadcrumb</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-buttons') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-buttons') }}">Buttons</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-card') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-card') }}">Card</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-carousel') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-carousel') }}">Carousel</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-collapse') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-collapse') }}">Collapse</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-dropdown') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-dropdown') }}">Dropdown</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-form') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-form') }}">Form</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-list-group') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-list-group') }}">List Group</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-media-object') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-media-object') }}">Media Object</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-modal') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-modal') }}">Modal</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-nav') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-nav') }}">Nav</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-navbar') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-navbar') }}">Navbar</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-pagination') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-pagination') }}">Pagination</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-popover') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-popover') }}">Popover</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-progress') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-progress') }}">Progress</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-table') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-table') }}">Table</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-tooltip') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-tooltip') }}">Tooltip</a>
-                    </li>
-                    <li class="{{ Request::is('bootstrap-typography') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('bootstrap-typography') }}">Typography</a>
-                    </li>
-                </ul>
-            </li>
-            <li class="menu-header">Stisla</li>
-            <li class="nav-item dropdown {{ $type_menu === 'components' ? 'active' : '' }}">
-                <a href="#"
-                    class="nav-link has-dropdown"><i class="fas fa-th-large"></i>
-                    <span>Components</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{{ Request::is('components-article') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('components-article') }}">Article</a>
-                    </li>
-                    <li class="{{ Request::is('components-avatar') ? 'active' : '' }}">
-                        <a class="nav-link beep beep-sidebar"
-                            href="{{ url('components-avatar') }}">Avatar</a>
-                    </li>
-                    <li class="{{ Request::is('components-chat-box') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('components-chat-box') }}">Chat Box</a>
-                    </li>
-                    <li class="{{ Request::is('components-empty-state') ? 'active' : '' }}">
-                        <a class="nav-link beep beep-sidebar"
-                            href="{{ url('components-empty-state') }}">Empty State</a>
-                    </li>
-                    <li class="{{ Request::is('components-gallery') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('components-gallery') }}">Gallery</a>
-                    </li>
-                    <li class="{{ Request::is('components-hero') ? 'active' : '' }}">
-                        <a class="nav-link beep beep-sidebar"
-                            href="{{ url('components-hero') }}">Hero</a>
-                    </li>
-                    <li class="{{ Request::is('components-multiple-upload') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('components-multiple-upload') }}">Multiple Upload</a>
-                    </li>
-                    <li class="{{ Request::is('components-pricing') ? 'active' : '' }}">
-                        <a class="nav-link beep beep-sidebar"
-                            href="{{ url('components-pricing') }}">Pricing</a>
-                    </li>
-                    <li class="{{ Request::is('components-statistic') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('components-statistic') }}">Statistic</a>
-                    </li>
-                    <li class="{{ Request::is('components-tab') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('components-tab') }}">Tab</a>
-                    </li>
-                    <li class="{{ Request::is('components-table') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('components-table') }}">Table</a>
-                    </li>
-                    <li class="{{ Request::is('components-user') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('components-user') }}">User</a>
-                    </li>
-                    <li class="{{ Request::is('components-wizard') ? 'active' : '' }}">
-                        <a class="nav-link beep beep-sidebar"
-                            href="{{ url('components-wizard') }}">Wizard</a>
-                    </li>
-                </ul>
-            </li>
-            <li class="nav-item dropdown {{ $type_menu === 'forms' ? 'active' : '' }}">
-                <a href="#"
-                    class="nav-link has-dropdown"><i class="far fa-file-alt"></i> <span>Forms</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{{ Request::is('forms-advanced-form') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('forms-advanced-form') }}">Advanced Form</a>
-                    </li>
-                    <li class="{{ Request::is('forms-editor') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('forms-editor') }}">Editor</a>
-                    </li>
-                    <li class="{{ Request::is('forms-validation') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('forms-validation') }}">Validation</a>
-                    </li>
-                </ul>
-            </li>
-            {{-- <li class="nav-item dropdown">
-                <a href="#"
-                    class="nav-link has-dropdown"><i class="fas fa-map-marker-alt"></i> <span>Google
-                        Maps</span></a>
-                <ul class="dropdown-menu">
-                    <li><a href="gmaps-advanced-route.html">Advanced Route</a></li>
-                    <li><a href="gmaps-draggable-marker.html">Draggable Marker</a></li>
-                    <li><a href="gmaps-geocoding.html">Geocoding</a></li>
-                    <li><a href="gmaps-geolocation.html">Geolocation</a></li>
-                    <li><a href="gmaps-marker.html">Marker</a></li>
-                    <li><a href="gmaps-multiple-marker.html">Multiple Marker</a></li>
-                    <li><a href="gmaps-route.html">Route</a></li>
-                    <li><a href="gmaps-simple.html">Simple</a></li>
-                </ul>
-            </li> --}}
-            <li class="nav-item dropdown {{ $type_menu === 'modules' ? 'active' : '' }}">
-                <a href="#"
-                    class="nav-link has-dropdown"><i class="fas fa-plug"></i> <span>Modules</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{{ Request::is('modules-calendar') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-calendar') }}">Calendar</a>
-                    </li>
-                    <li class="{{ Request::is('modules-chartjs') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-chartjs') }}">ChartJS</a>
-                    </li>
-                    <li class="{{ Request::is('modules-datatables') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-datatables') }}">DataTables</a>
-                    </li>
-                    <li class="{{ Request::is('modules-flag') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-flag') }}">Flag</a>
-                    </li>
-                    <li class="{{ Request::is('modules-font-awesome') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-font-awesome') }}">Font Awesome</a>
-                    </li>
-                    <li class="{{ Request::is('modules-ion-icons') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-ion-icons') }}">Ion Icons</a>
-                    </li>
-                    <li class="{{ Request::is('modules-owl-carousel') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-owl-carousel') }}">Owl Carousel</a>
-                    </li>
-                    <li class="{{ Request::is('modules-sparkline') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-sparkline') }}">Sparkline</a>
-                    </li>
-                    <li class="{{ Request::is('modules-sweet-alert') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-sweet-alert') }}">Sweet Alert</a>
-                    </li>
-                    <li class="{{ Request::is('modules-toastr') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-toastr') }}">Toastr</a>
-                    </li>
-                    <li class="{{ Request::is('modules-vector-map') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-vector-map') }}">Vector Map</a>
-                    </li>
-                    <li class="{{ Request::is('modules-weather-icon') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('modules-weather-icon') }}">Weather Icon</a>
-                    </li>
-                </ul>
-            </li>
-            <li class="menu-header">Pages</li>
-            <li class="nav-item dropdown {{ $type_menu === 'auth' ? 'active' : '' }}">
-                <a href="#"
-                    class="nav-link has-dropdown"><i class="far fa-user"></i> <span>Auth</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{{ Request::is('auth-forgot-password') ? 'active' : '' }}">
-                        <a href="{{ url('auth-forgot-password') }}">Forgot Password</a>
-                    </li>
-                    <li class="{{ Request::is('auth-login') ? 'active' : '' }}">
-                        <a href="{{ url('auth-login') }}">Login</a>
-                    </li>
-                    <li class="{{ Request::is('auth-login2') ? 'active' : '' }}">
-                        <a class="beep beep-sidebar"
-                            href="{{ url('auth-login2') }}">Login 2</a>
-                    </li>
-                    <li class="{{ Request::is('auth-register') ? 'active' : '' }}">
-                        <a href="{{ url('auth-register') }}">Register</a>
-                    </li>
-                    <li class="{{ Request::is('auth-reset-password') ? 'active' : '' }}">
-                        <a href="{{ url('auth-reset-password') }}">Reset Password</a>
-                    </li>
-                </ul>
-            </li>
-            <li class="nav-item dropdown {{ $type_menu === 'error' ? 'active' : '' }}">
-                <a href="#"
-                    class="nav-link has-dropdown"><i class="fas fa-exclamation"></i>
-                    <span>Errors</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{{ Request::is('error-403') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('error-403') }}">403</a>
-                    </li>
-                    <li class="{{ Request::is('error-404') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('error-404') }}">404</a>
-                    </li>
-                    <li class="{{ Request::is('error-500') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('error-500') }}">500</a>
-                    </li>
-                    <li class="{{ Request::is('error-503') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('error-503') }}">503</a>
-                    </li>
-                </ul>
-            </li>
-            <li class="nav-item dropdown {{ $type_menu === 'features' ? 'active' : '' }}">
-                <a href="#"
-                    class="nav-link has-dropdown"><i class="fas fa-bicycle"></i> <span>Features</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{{ Request::is('features-activities') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('features-activities') }}">Activities</a>
-                    </li>
-                    <li class="{{ Request::is('features-post-create') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('features-post-create') }}">Post Create</a>
-                    </li>
-                    <li class="{{ Request::is('features-post') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('features-post') }}">Posts</a>
-                    </li>
-                    <li class="{{ Request::is('features-profile') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('features-profile') }}">Profile</a>
-                    </li>
-                    <li class="{{ Request::is('features-settings') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('features-settings') }}">Settings</a>
-                    </li>
-                    <li class="{{ Request::is('features-setting-detail') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('features-setting-detail') }}">Setting Detail</a>
-                    </li>
-                    <li class="{{ Request::is('features-tickets') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('features-tickets') }}">Tickets</a>
-                    </li>
-                </ul>
-            </li>
-            <li class="nav-item dropdown {{ $type_menu === 'utilities' ? 'active' : '' }}">
-                <a href="#"
-                    class="nav-link has-dropdown"><i class="fas fa-ellipsis-h"></i>
-                    <span>Utilities</span></a>
-                <ul class="dropdown-menu">
-                    <li class="{{ Request::is('utilities-contact') ? 'active' : '' }}">
-                        <a href="{{ url('utilities-contact') }}">Contact</a>
-                    </li>
-                    <li class="{{ Request::is('utilities-invoice') ? 'active' : '' }}">
-                        <a class="nav-link"
-                            href="{{ url('utilities-invoice') }}">Invoice</a>
-                    </li>
-                    <li class="{{ Request::is('utilities-subscribe') ? 'active' : '' }}">
-                        <a href="{{ url('utilities-subscribe') }}">Subscribe</a>
-                    </li>
-                </ul>
-            </li>
-            <li class="{{ Request::is('credits') ? 'active' : '' }}">
+            <li class="menu-header">Features</li>
+            @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator' || auth()->user()->role === 'Front Office' || auth()->user()->role === 'Back Office' || auth()->user()->role === 'Lurah'))
+                <li class="nav-item dropdown {{ $type_menu === 'master-data' ? 'active' : '' }}">
+                    <a href="#"
+                        class="nav-link has-dropdown"
+                        data-toggle="dropdown"><i class="fas fa-database"></i> <span>Master Data</span></a>
+                    <ul class="dropdown-menu">
+                        <li class="{{ Request::is('Master-Data/Member', 'Master-Data/Member/*/edit') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('Member.index') }}">Data Member</a>
+                        </li>
+                        <li class="nav-item dropdown {{ Request::is('Master-Data/Data-Layanan') ? 'active' : '' }}">
+                            <a class="nav-link has-dropdown"
+                            data-toggle="dropdown" href="#"><span>Data Layanan</span></a>
+                            <ul class="dropdown-menu">
+                                <li class="{{ Request::is('Master-Data/Data-Layanan/Layanan', 'admin/layanan/create') ? 'active' : '' }}">
+                                    <a class="nav-link"
+                                        href="{{ route('masterdata.layanan') }}">Layanan</a>
+                                </li>
+                                <li class="{{ Request::is('Master-Data/Data-Layanan/sub-layanan') ? 'active' : '' }}">
+                                    <a class="nav-link"
+                                        href="{{ route('masterdata.sub-layanan') }}">Sub Layanan</a>
+                                </li>
+                                <li class="{{ Request::is('Master-Data/Data-Layanan/layanan-item') ? 'active' : '' }}">
+                                    <a class="nav-link"
+                                        href="{{ route('masterdata.layanan-item') }}">Sub Layanan Item</a>
+                                </li>
+                                <li class="{{ Request::is('Master-Data/Data-Layanan/kategori-pendaftaran') ? 'active' : '' }}">
+                                    <a class="nav-link"
+                                        href="{{ route('masterdata.kategori-pendaftaran') }}">Kategori Pendaftaran</a>
+                                </li>
+                                <li class="{{ Request::is('Master-Data/Data-Layanan/kategori-pemohon') ? 'active' : '' }}">
+                                    <a class="nav-link"
+                                        href="{{ route('masterdata.kategori-pemohon') }}">Kategori Pemohon</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/Loket', 'Master-Data/Loket/create', 'Master-Data/Loket/*/edit') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('Loket.index') }}">Data Loket</a>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/ApiWhatsapp', 'Master-Data/ApiWhatsapp/create', 'Master-Data/ApiWhatsapp/*/edit') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('ApiWhatsapp.index') }}">Data API Whatsapp</a>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/Antarmuka') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('Antarmuka.index') }}">Data Antarmuka</a>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/Pemohon') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('masterdata.pemohon') }}">Data Pemohon</a>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/Pegawai') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('Pegawai.index') }}">Data Pegawai</a>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/Data-SKM') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('admin.Data-SKM.index') }}">Data SKM</a>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/Data-Kependudukan', 'Master-Data/Data-Kependudukan/edit') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('admin.kependudukan.index') }}">Data Kependudukan</a>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/Data-Perpu', 'Master-Data/Data-Perpu/create', 'Master-Data/Data-Perpu/{id}') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('admin.Perpu.index') }}">Data Perpu</a>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/BankData', 'Master-Data/BankData/create', 'Master-Data/Data-Perpu/{id}') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('admin.masterdata.BankData.index') }}">Data BankData</a>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/Spesimen', 'Master-Data/Spesimen/create') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('admin.masterdata.Spesimen.index') }}">Spesimen TTD & Stampel</a>
+                        </li>
+                    </ul>
+                </li>
+            @endif
+            @if(auth()->check() && (auth()->user()->role === 'Ketua RT' || auth()->user()->role === 'Ketua RW' || auth()->user()->role === 'Operator'))
+                <li class="nav-item dropdown {{ $type_menu === 'master-data' ? 'active' : '' }}">
+                    <a href="#"
+                        class="nav-link has-dropdown"
+                        data-toggle="dropdown"><i class="fas fa-database"></i> <span>Master Data</span></a>
+                    <ul class="dropdown-menu">
+                        <li class="{{ Request::is('Master-Data/BankData', 'Master-Data/BankData/create', 'Master-Data/Data-Perpu/{id}') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('admin.masterdata.BankData.index') }}">Data BankData</a>
+                        </li>
+                        <li class="{{ Request::is('Master-Data/Spesimen', 'Master-Data/Spesimen/create') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('admin.masterdata.Spesimen.index') }}">Spesimen TTD & Stampel</a>
+                        </li>
+                    </ul>
+                </li>
+            @endif
+            {{-- <li class="{{ Request::is('psu') ? 'active' : '' }}">
                 <a class="nav-link"
-                    href="{{ url('credits') }}"><i class="fas fa-pencil-ruler">
-                    </i> <span>Credits</span>
+                    href="{{ route('psu.index') }}"><i class="fas fa-file-alt"></i> <span>PSU</span></a>
+            </li> --}}
+            <li class="nav-item dropdown {{ $type_menu === 'psu' ? 'active' : '' }}">
+                <a href="#"
+                    class="nav-link has-dropdown">
+                    <i class="fas fa-file-alt"></i>
+                    <span>PSU</span>
+                    {{-- Badge untuk total notifikasi surat masuk --}}
+                    {{-- @if(auth()->check() && in_array(auth()->user()->role, ['admin', 'user', 'Ketua RT', 'Ketua RW']))
+                        <span class="badge badge-info ml-1" id="total-psu-notification" style="display: none;">0</span>
+                    @endif --}}
                 </a>
+                <ul class="dropdown-menu">
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'user' || auth()->user()->role === 'Ketua RT' || auth()->user()->role === 'Ketua RW' ))
+                    <li class="{{ Request::is('psu','psu-permohonan-saya', 'psu/create') ? 'active' : '' }}">
+                        <a class="nav-link"
+                        href="{{ route('psu.permohonan-saya') }}">
+                        Permohonan Saya
+                        {{-- <i class="fas fa-file-alt mr-2"></i>Permohonan Saya --}}
+                    </a>
+                    </li>
+                    @endif
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'user'))
+                        <li class="{{ Request::is('surat-masuk/psu') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('surat-masuk.psu.index') }}">
+                                Surat Masuk
+                                {{-- <i class="fas fa-inbox mr-2"></i>Surat Masuk --}}
+                                {{-- Badge khusus untuk surat masuk --}}
+                                {{-- <span class="badge badge-success ml-1" id="surat-masuk-psu-count" style="display: none;">0</span> --}}
+                            </a>
+                        </li>
+                    @endif
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Ketua RT' || auth()->user()->role === 'Ketua RW' || auth()->user()->role === 'Front Office' || auth()->user()->role === 'Back Office' || auth()->user()->role === 'Lurah' ))
+                        <li class="{{ Request::is('psu-semua-permohonan') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('psu.semua-permohonan') }}">
+                                Semua Permohonan
+                                {{-- <i class="fas fa-list mr-2"></i>Semua Permohonan --}}
+                            </a>
+                        </li>
+                    @endif
+                </ul>
             </li>
-        </ul>
+            <li class="nav-item dropdown {{ $type_menu === 'skaw' ? 'active' : '' }}">
+                <a href="#" class="nav-link has-dropdown">
+                    <i class="fas fa-users"></i>
+                    <span>SKAW</span>
+                </a>
+                <ul class="dropdown-menu">
+                    {{-- Menu 1: Permohonan Saya - Untuk User dan Admin --}}
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'user'))
+                        <li class="{{ Request::is('skaw', 'skaw/permohonan-saya', 'skaw/create', 'skaw/*/edit') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('skaw.permohonan-saya') }}">
+                                Permohonan Saya
+                            </a>
+                        </li>
+                    @endif
 
-        <div class="hide-sidebar-mini mt-4 mb-4 p-3">
-            <a href="https://getstisla.com/docs"
-                class="btn btn-primary btn-lg btn-block btn-icon-split">
-                <i class="fas fa-rocket"></i> Documentation
-            </a>
-        </div>
+                    {{-- Menu 2: Semua Permohonan - Untuk Front Office, Back Office, Lurah, Camat --}}
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Front Office' || auth()->user()->role === 'Back Office' || auth()->user()->role === 'Lurah' || auth()->user()->role === 'Camat'))
+                        <li class="{{ Request::is('skaw/semua-permohonan') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('skaw.semua-permohonan') }}">
+                                Semua Permohonan
+                            </a>
+                        </li>
+                    @endif
+
+                    {{-- Menu 3: Daftar Jadwal Sidang - Untuk semua role yang terlibat --}}
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'user' || auth()->user()->role === 'Front Office' || auth()->user()->role === 'Back Office' || auth()->user()->role === 'Lurah' || auth()->user()->role === 'Camat'))
+                        <li class="{{ Request::is('skaw/daftar-sidang') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('skaw.daftar-sidang') }}">
+                                Daftar Jadwal Sidang
+                            </a>
+                        </li>
+                    @endif
+
+                    {{-- Menu 4: Berkas Pasca Sidang - Untuk approval Lurah dan Camat --}}
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'user' || auth()->user()->role === 'Back Office' || auth()->user()->role === 'Lurah' || auth()->user()->role === 'Camat'))
+                        <li class="{{ Request::is('skaw/telah-sidang') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('skaw.telah-sidang') }}">
+                                Berkas Pasca Sidang
+                            </a>
+                        </li>
+                    @endif
+
+                    {{-- Menu 5: SKAW Selesai - Untuk melihat dokumen final --}}
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'user' || auth()->user()->role === 'Front Office' || auth()->user()->role === 'Back Office' || auth()->user()->role === 'Lurah' || auth()->user()->role === 'Camat'))
+                        <li class="{{ Request::is('skaw/skaw-jadi') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('skaw.skaw-jadi') }}">
+                                SKAW Selesai
+                            </a>
+                        </li>
+                    @endif
+                </ul>
+            </li>
+            <li class="{{ Request::is('puntadewa', 'puntadewa/create') ? 'active' : '' }}">
+                <a class="nav-link"
+                    href="{{ route('puntadewa.index') }}"><i class="fas fa-clipboard-list"></i> <span>Puntadewa</span></a>
+            </li>
+            <li class="{{ Request::is('blank-page') ? 'active' : '' }}">
+                <a class="nav-link"
+                    href="{{ route('home') }}"><i class="fas fa-map-marker-alt"></i> <span>Verifikasi Domisili</span></a>
+            </li>
+            <li class="{{ Request::is('surat-pengantar', 'surat-pengantar/create') ? 'active' : '' }}">
+                <a class="nav-link"
+                    href="{{ route('surat-pengantar.index') }}"><i class="fas fa-paper-plane"></i> <span>Surat Pengantar</span></a>
+            </li>
+            <li class="menu-header">Preferences</li>
+            {{-- <li class="{{ Request::is('Profile') ? 'active' : '' }}">
+                <a class="nav-link"
+                    href="{{ route('Profile.index') }}"><i class="fas fa-user"></i> <span>Profile</span></a>
+            </li> --}}
+            <li class="nav-item dropdown {{ $type_menu === 'profile' ? 'active' : '' }}">
+                <a href="#"
+                    class="nav-link has-dropdown"><i class="fas fa-user"></i><span>Profile</span></a>
+                <ul class="dropdown-menu">
+                    <li class='{{ Request::is('Profile') ? 'active' : '' }}'>
+                        <a class="nav-link"
+                            href="{{ route('Profile.index') }}">Informasi Profile</a>
+                    </li>
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'user' || auth()->user()->role === 'Ketua RT' || auth()->user()->role === 'Ketua RW' ))
+                        <li class="{{ Request::is('Profile/permohonan-saya') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('user-applications.index') }}">Permohonan Saya</a>
+                        </li>
+                    @endif
+                    @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Ketua RT' || auth()->user()->role === 'Ketua RW' ))
+                        <li class="{{ Request::is('Profile/user-applications/all') ? 'active' : '' }}">
+                            <a class="nav-link"
+                                href="{{ route('user-applications.index-all') }}">Semua Permohonan</a>
+                        </li>
+                    @endif
+                </ul>
+            </li>
+            <li class="{{ Request::is('Activities') ? 'active' : '' }}">
+                <a class="nav-link"
+                    href="{{ route('activities.index') }}"><i class="fas fa-bolt"></i> <span>Activities</span></a>
+            </li>
+            <li class="{{ Request::is('Settings', 'Settings/General-Setting') ? 'active' : '' }}">
+                <a class="nav-link"
+                    href="{{ route('settings.index') }}"><i class="fas fa-cog"></i> <span>Settings</span></a>
+            </li>
+
+        </ul>
     </aside>
 </div>
+
+{{-- <script>
+    $(document).ready(function() {
+        // Function untuk load notification counts
+        function loadPsuNotificationCounts() {
+            console.log('testing load PSU notificationsssss');
+            // Hanya untuk role yang memiliki akses ke surat masuk
+            @if(auth()->check() && in_array(auth()->user()->role, ['admin', 'user', 'Ketua RT', 'Ketua RW']))
+
+            // Load surat masuk count
+            $.ajax({
+                url: "{{ route('surat-masuk.psu.summary') }}",
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        const totalSuratMasuk = response.data.total_surat_masuk || 0;
+                        const newSuratToday = response.data.hari_ini || 0;
+
+                        // Update badge surat masuk (tampilkan jika ada surat hari ini)
+                        if (newSuratToday > 0) {
+                            $('#surat-masuk-psu-count').text(newSuratToday).show();
+                        } else {
+                            $('#surat-masuk-psu-count').hide();
+                        }
+
+                        // Update total notification di menu utama
+                        if (totalSuratMasuk > 0) {
+                            $('#total-psu-notification').text(totalSuratMasuk).show();
+                        } else {
+                            $('#total-psu-notification').hide();
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error loading surat masuk notification:', xhr);
+                    // Hide badges on error
+                    $('#surat-masuk-psu-count').hide();
+                    $('#total-psu-notification').hide();
+                }
+            });
+
+            @endif
+        }
+
+        // Load initial counts
+        loadPsuNotificationCounts();
+
+        // Auto refresh every 60 seconds (1 minute)
+        setInterval(loadPsuNotificationCounts, 60000);
+
+        // Refresh when page becomes visible (user switches back to tab)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                loadPsuNotificationCounts();
+            }
+        });
+
+        // Refresh when user clicks on surat masuk menu
+        $('a[href="{{ route('surat-masuk.psu.index') }}"]').on('click', function() {
+            // Reset badge surat masuk karena user sudah buka halaman
+            setTimeout(function() {
+                $('#surat-masuk-psu-count').hide();
+            }, 1000);
+        });
+    });
+</script> --}}

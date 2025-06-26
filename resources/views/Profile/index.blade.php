@@ -1,31 +1,18 @@
 @extends('Template.template')
 
-{{-- @section('title', 'General Dashboard') --}}
-
 @push('style')
     <!-- CSS Libraries -->
-    <link rel="stylesheet"
-        href="{{ asset('library/jqvmap/dist/jqvmap.min.css') }}">
-    <link rel="stylesheet"
-        href="{{ asset('library/summernote/dist/summernote-bs4.min.css') }}">
-
-    <link rel="stylesheet"
-        href="{{ asset('library/bootstrap/dist/css/bootstrap.min.css') }}">
-
-    <link rel="stylesheet"
-        href="{{ asset('library/bootstrap-social/assets/css/bootstrap.css') }}">
-
+    <link rel="stylesheet" href="{{ asset('library/jqvmap/dist/jqvmap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('library/summernote/dist/summernote-bs4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('library/bootstrap/dist/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('library/bootstrap-social/assets/css/bootstrap.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-    <link rel="stylesheet"
-        href="{{ asset('library/select2/dist/css/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('library/select2/dist/css/select2.min.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css" rel="stylesheet">
 
     <!-- Template CSS -->
-    <link rel="stylesheet"
-        href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet"
-        href="{{ asset('css/components.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
 
     <style>
         .profile-widget-picture {
@@ -38,33 +25,6 @@
             margin-bottom: 0;
             padding: 0.5rem 0;
         }
-
-        /* Perbaikan untuk select yang terpotong */
-        select.form-control {
-            /* height: auto !important; Override height default */
-            white-space: normal; /* Memungkinkan text wrap */
-            min-height: 38px; /* Minimum height untuk select */
-        }
-
-        .select-container {
-            position: relative;
-            width: 100%;
-            z-index: 1000; /* Memastikan dropdown muncul di atas element lain */
-        }
-
-        /* Memastikan dropdown options tidak terpotong */
-        select.form-control option {
-            padding: 8px;
-            white-space: normal;
-        }
-
-        /* Memperbaiki container form-group */
-        .form-group {
-            margin-bottom: 1.5rem;
-            position: relative;
-            overflow: visible; /* Memungkinkan dropdown keluar dari container */
-        }
-        /* */
 
         .select2-container {
             width: 100% !important;
@@ -86,12 +46,288 @@
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 42px !important;
         }
+
+        .rt-rw-highlight {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
+            border: 2px solid #ffc107 !important;
+            border-radius: 12px !important;
+            padding: 15px !important;
+            position: relative !important;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3) !important;
+        }
+
+        .rt-rw-highlight::before {
+            content: "WAJIB DIISI";
+            position: absolute;
+            top: -8px;
+            right: 10px;
+            background: #ffc107;
+            color: #212529;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .rt-rw-highlight label {
+            font-weight: bold !important;
+            color: #856404 !important;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8) !important;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes enhanced-pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.8);
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(1.02);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 193, 7, 0);
+                transform: scale(1);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+                transform: scale(1);
+            }
+        }
+
+        .select-container {
+            position: relative;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .select-container select {
+            transition: all 0.3s ease;
+        }
+
+        .select-container select:focus {
+            border-color: #6777ef !important;
+            box-shadow: 0 0 0 0.2rem rgba(103, 119, 239, 0.25) !important;
+        }
+
+        .select-container select:disabled {
+            background-color: #f8f9fa !important;
+            color: #6c757d !important;
+            cursor: not-allowed !important;
+        }
+
+        .ketua-rw-section {
+            border-left: 4px solid #28a745;
+            padding-left: 15px;
+        }
+
+        .ketua-rt-section {
+            border-left: 4px solid #17a2b8;
+            padding-left: 15px;
+        }
+
+        /* Tooltip for disabled options */
+        .disabled-option {
+            color: #6c757d !important;
+            background-color: #f8f9fa !important;
+            cursor: not-allowed !important;
+        }
+
+        /* Success state after selection */
+        .rt-rw-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
+            border: 2px solid #28a745 !important;
+            border-radius: 12px !important;
+            padding: 15px !important;
+            position: relative !important;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3) !important;
+        }
+
+        .rt-rw-success::before {
+            content: "✓ LENGKAP";
+            position: absolute;
+            top: -8px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .rt-rw-success label {
+            font-weight: bold !important;
+            color: #155724 !important;
+        }
+
+        /* Loading state for selects */
+        .select-loading {
+            position: relative;
+        }
+
+        .select-loading::after {
+            content: '';
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #6777ef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        select.form-control {
+            white-space: normal;
+            min-height: 38px;
+        }
+
+        select.form-control option {
+            padding: 8px;
+            white-space: normal;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: visible;
+        }
+
+        /* Recent Activities Scrollbar Styles - VERTICAL SCROLL */
+        .activities-container {
+            max-height: 400px; /* Fixed height to show about 4 activities */
+            overflow-y: auto; /* Vertical scroll when content exceeds height */
+            overflow-x: hidden; /* Hide horizontal overflow */
+            padding-right: 5px; /* Space for scrollbar */
+        }
+
+        .activities-list {
+            width: 100%;
+        }
+
+        /* Custom scrollbar styling */
+        .activities-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .activities-container::-webkit-scrollbar-track {
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+
+        .activities-container::-webkit-scrollbar-thumb {
+            background: #dee2e6;
+            border-radius: 3px;
+        }
+
+        .activities-container::-webkit-scrollbar-thumb:hover {
+            background: #adb5bd;
+        }
+
+        /* Activity items styling - always vertical display */
+        .activities-list .media {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 15px;
+            transition: background-color 0.2s ease;
+        }
+
+        .activities-list .media:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .activities-list .media:hover {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            margin: -5px -10px 10px -10px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .activities-container {
+                max-height: 350px;
+            }
+
+            .rt-rw-highlight {
+                margin-bottom: 20px;
+            }
+
+            .rt-rw-highlight::before {
+                font-size: 9px;
+                padding: 1px 6px;
+            }
+
+            .select-container {
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Custom scrollbar for select dropdowns */
+        select option {
+            padding: 10px;
+            margin: 2px 0;
+            border-radius: 4px;
+        }
+
+        /* Enhanced info alert styling */
+        .alert-info {
+            border-left: 4px solid #17a2b8;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-color: #17a2b8;
+        }
+
+        .alert-info h6 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+
+        .alert-info p {
+            color: #0c5460;
+            /* margin-bottom: 10px; */
+        }
+
+        .alert-info ol {
+            padding-left: 20px;
+        }
+
+        .alert-info ol li {
+            margin-bottom: 5px;
+            color: #0c5460;
+        }
+
+        /* Status indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-required { background-color: #dc3545; }
+        .status-optional { background-color: #6c757d; }
+        .status-completed { background-color: #28a745; }
     </style>
 @endpush
 
-
 @section('Dashboard')
-
     @include('admin.dashboard.header')
     @include('admin.dashboard.sidebar')
 
@@ -114,32 +350,112 @@
                 <div class="row mt-sm-4">
                     <!-- Card Profile -->
                     <div class="col-12 col-md-12 col-lg-5">
-                        <div class="card profile-widget">
-                            <div class="profile-widget-header">
-                                <img alt="image" src="{{ asset(Auth::user()->image ?? 'img/avatar/avatar-1.png') }}"
-                                    class="rounded-circle profile-widget-picture">
-                                <div class="profile-widget-items">
-                                    <div class="profile-widget-item">
-                                        <div class="profile-widget-item-label">Pengajuan Surat</div>
-                                        <div class="profile-widget-item-value">12</div>
+                        <div class="row mt-sm-4">
+                            <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                                <div class="card profile-widget">
+                                    <div class="profile-widget-header">
+                                        <img alt="image" src="{{ asset(Auth::user()->image ?? 'img/avatar/avatar-1.png') }}"
+                                        class="rounded-circle profile-widget-picture">
+                                        <div class="d-flex justify-content-end align-items-center mb-2">
+                                            {{-- <h6 class="mb-0">Statistik Dokumen</h6> --}}
+                                            <button type="button" class="btn btn-sm btn-outline-primary" id="refresh-stats" title="Refresh Statistik">
+                                                <i class="fas fa-sync-alt"></i> Refresh Data
+                                            </button>
+                                        </div>
+                                        <!-- Grid Statistik 2x2 -->
+                                        <div class="row no-gutters">
+                                            <div class="col-6 mb-3">
+                                                <div class="profile-widget-item text-center">
+                                                    <div class="profile-widget-item-label text-black-50 small" style="font-weight: bold;">Pengajuan Surat</div>
+                                                    <div class="profile-widget-item-value"
+                                                        style="background-color: #6777ef; margin: 0 10px; padding: 8px; border-radius: 12px; color: black; font-weight: bold; font-size: 18px;"
+                                                        id="total-pengajuan">
+                                                        {{ $userStats['total_pengajuan'] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <div class="profile-widget-item text-center">
+                                                    <div class="profile-widget-item-label text-black-50 small" style="font-weight: bold;">Selesai</div>
+                                                    <div class="profile-widget-item-value"
+                                                        style="background-color: #28a745; margin: 0 10px; padding: 8px; border-radius: 12px; color: black; font-weight: bold; font-size: 18px;"
+                                                        id="total-selesai">
+                                                        {{ $userStats['selesai'] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="profile-widget-item text-center">
+                                                    <div class="profile-widget-item-label text-black-50 small" style="font-weight: bold;">Proses</div>
+                                                    <div class="profile-widget-item-value"
+                                                        style="background-color: #ffc107; margin: 0 10px; padding: 8px; border-radius: 12px; color: #212529; font-weight: bold; font-size: 18px;"
+                                                        id="total-proses">
+                                                        {{ $userStats['proses'] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="profile-widget-item text-center">
+                                                    <div class="profile-widget-item-label text-black-50 small" style="font-weight: bold;">Ditolak</div>
+                                                    <div class="profile-widget-item-value"
+                                                        style="background-color: #dc3545; margin: 0 10px; padding: 8px; border-radius: 12px; color: white; font-weight: bold; font-size: 18px;"
+                                                        id="total-ditolak">
+                                                        {{ $userStats['ditolak'] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="profile-widget-item">
-                                        <div class="profile-widget-item-label">Selesai</div>
-                                        <div class="profile-widget-item-value">10</div>
-                                    </div>
-                                    <div class="profile-widget-item">
-                                        <div class="profile-widget-item-label">Proses</div>
-                                        <div class="profile-widget-item-value">2</div>
+                                    <div class="profile-widget-description">
+                                        <div class="profile-widget-name"><h5>( {{ Auth::user()->role }} {{ Auth::user()->role === 'Ketua RT' ? Auth::user()->rt : (Auth::user()->role === 'Ketua RW' ? Auth::user()->rw : '') }}  )</h5></div>
+                                        <div class="profile-widget-name">{{ Auth::user()->name }}
+                                            <div class="text-muted d-inline font-weight-normal">
+                                                <div class="slash"></div> {{ Auth::user()->pekerjaan }}
+                                            </div>
+                                        </div>
+                                        {!! Auth::user()->description !!}
                                     </div>
                                 </div>
                             </div>
-                            <div class="profile-widget-description">
-                                <div class="profile-widget-name">{{ Auth::user()->name }}<div
-                                        class="text-muted d-inline font-weight-normal">
-                                        <div class="slash"></div> {{ Auth::user()->pekerjaan }}
+                        </div>
+                        <div class="row mt-sm-4">
+                            <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4>Recent Activities</h4>
+                                        <div class="card-header-action">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" id="refresh-activities" title="Refresh Activities">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Activities Container with Fixed Height and Scroll -->
+                                        <div class="activities-container">
+                                            <ul class="list-unstyled list-unstyled-border activities-list" id="activities-list">
+                                                <!-- Activities will be loaded here -->
+                                                <li class="media" id="loading-activities">
+                                                    <div class="media-body text-center">
+                                                        <i class="fas fa-spinner fa-spin"></i> Loading activities...
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- View All Button Container -->
+                                        <div class="pt-3 pb-1 text-center border-top" id="view-all-container" style="display: none;">
+                                            <!-- Button will be dynamically updated based on user role -->
+                                        </div>
+
+                                        <!-- No Activities Message -->
+                                        <div class="pt-1 pb-1 text-center" id="no-activities" style="display: none;">
+                                            <div class="text-muted">
+                                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                                <p>Belum ada aktivitas terbaru</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                {!! Auth::user()->description !!}
                             </div>
                         </div>
                     </div>
@@ -258,17 +574,74 @@
                                             </div>
                                             <input type="hidden" name="kelurahan_text" id="kelurahan-text" value="{{ Auth::user()->kelurahan }}">
                                         </div>
-                                        <div class="form-group col-md-3">
-                                            <label>RW</label>
-                                            <p class="profile-text">{{ Auth::user()->rw ?? '-' }}</p>
-                                            <input type="text" name="rw" class="form-control profile-input d-none" value="{{ Auth::user()->rw }}" maxlength="3">
+
+                                        <!-- RT/RW Section with Highlighting -->
+                                        @php
+                                            $isRTRWRole = in_array(Auth::user()->role, ['Ketua RT', 'Ketua RW']);
+                                            $needsRWHighlight = $isRTRWRole && empty(Auth::user()->rw);
+                                            $needsRTHighlight = Auth::user()->role === 'Ketua RT' && empty(Auth::user()->rt);
+                                        @endphp
+
+                                        <div class="form-group col-md-3 {{ $needsRWHighlight ? 'rt-rw-highlight pulse-animation' : '' }}" id="rw-section">
+                                            <label>RW
+                                                @if($isRTRWRole)<span class="text-danger">*</span>@endif
+                                            </label>
+                                            <p class="profile-text">{{ Auth::user()->rw ? 'RW ' . Auth::user()->rw : '-' }}</p>
+                                            <div class="profile-input d-none">
+                                                <div class="select-container">
+                                                    <select name="rw" id="rw-select" class="form-control">
+                                                        <option value="">Pilih RW</option>
+                                                        @if(isset($availableRW))
+                                                            @foreach($availableRW as $rw)
+                                                                <option value="{{ $rw['value'] }}"
+                                                                    data-rt-count="{{ $rw['rt_count'] }}"
+                                                                    {{ Auth::user()->rw == $rw['value'] ? 'selected' : '' }}>
+                                                                    {{ $rw['label'] }}
+                                                                </option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-group col-md-3">
-                                            <label>RT</label>
-                                            <p class="profile-text">{{ Auth::user()->rt ?? '-' }}</p>
-                                            <input type="text" name="rt" class="form-control profile-input d-none" value="{{ Auth::user()->rt }}" maxlength="3">
+
+                                        <div class="form-group col-md-3 {{ $needsRTHighlight ? 'rt-rw-highlight pulse-animation' : '' }}" id="rt-section">
+                                            <label>RT
+                                                @if(Auth::user()->role === 'Ketua RT')<span class="text-danger">*</span>@endif
+                                            </label>
+                                            <p class="profile-text">{{ Auth::user()->rt ? 'RT ' . Auth::user()->rt : '-' }}</p>
+                                            <div class="profile-input d-none">
+                                                <div class="select-container">
+                                                    <select name="rt" id="rt-select" class="form-control" disabled>
+                                                        <option value="">Pilih RT</option>
+                                                        <!-- RT options will be loaded dynamically based on RW selection -->
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+
+                                    @if($isRTRWRole)
+                                        <div class="row profile-input d-none">
+                                            <div class="col-12">
+                                                <div class="alert alert-info">
+                                                    <h6><i class="fas fa-info-circle"></i> Informasi Penting</h6>
+                                                    @if(Auth::user()->role === 'Ketua RW')
+                                                        <p class="mb-2">Sebagai <strong>Ketua RW</strong>, Anda wajib mengisi informasi RW untuk dapat melakukan proses persetujuan dokumen-dokumen pelayanan.</p>
+                                                        <p class="mb-0"><small><strong>Catatan:</strong> Setiap RW hanya dapat dipimpin oleh satu Ketua RW. RW yang sudah dipilih oleh Ketua RW lain tidak akan muncul dalam pilihan.</small></p>
+                                                    @elseif(Auth::user()->role === 'Ketua RT')
+                                                        <p class="mb-2">Sebagai <strong>Ketua RT</strong>, Anda wajib mengisi informasi RW dan RT untuk dapat melakukan proses persetujuan dokumen-dokumen pelayanan.</p>
+                                                        <p class="mb-1"><small><strong>Langkah:</strong></small></p>
+                                                        <ol class="mb-2" style="font-size: 0.9em;">
+                                                            <li>Pilih RW terlebih dahulu</li>
+                                                            <li>Kemudian pilih RT yang tersedia di RW tersebut</li>
+                                                        </ol>
+                                                        <p class="mb-0"><small><strong>Catatan:</strong> Setiap kombinasi RW-RT hanya dapat dipimpin oleh satu Ketua RT. RW yang sudah dipimpin oleh Ketua RW tidak dapat dipilih oleh Ketua RT.</small></p>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
 
                                     <div class="row">
                                         <div class="form-group col-12">
@@ -358,7 +731,6 @@
 @endsection
 
 @push('scripts')
-
     <!-- General JS Scripts -->
     <script src="{{ asset('library/jquery/dist/jquery.min.js') }}"></script>
     <script src="{{ asset('library/popper.js/dist/umd/popper.js') }}"></script>
@@ -377,26 +749,488 @@
     <script src="{{ asset('library/chocolat/dist/js/jquery.chocolat.min.js') }}"></script>
     <script src="{{ asset('library/jqvmap/dist/maps/jquery.vmap.indonesia.js') }}"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script src="{{ asset('library/jquery-sparkline/jquery.sparkline.min.js') }}"></script>
     <script src="{{ asset('library/chart.js/dist/Chart.js') }}"></script>
     <script src="{{ asset('library/owl.carousel/dist/owl.carousel.min.js') }}"></script>
     <script src="{{ asset('library/select2/dist/js/select2.full.min.js') }}"></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Page Specific JS File -->
     <script src="{{ asset('js/page/index-0.js') }}"></script>
-    {{-- <script src="{{ asset('js/page/index.js') }}"></script> --}}
     <script src="{{ asset('js/page/modules-chartjs.js') }}"></script>
-
 
     <script>
         $(document).ready(function() {
-            // Toggle edit mode
-            // Inisialisasi Select2
-            // initializeSelect2();
             let select2Initialized = false;
             let summernoteInitialized = false;
+
+            // Check if we need to auto-open edit mode and focus on RT/RW
+            const urlParams = new URLSearchParams(window.location.search);
+            const focusField = urlParams.get('focus');
+
+            if (focusField && (focusField === 'rt' || focusField === 'rw')) {
+                // Auto-open edit mode
+                setTimeout(() => {
+                    $('#btn-edit').click();
+
+                    // Focus on the appropriate field after edit mode is opened
+                    setTimeout(() => {
+                        if (focusField === 'rw') {
+                            $('#rw-select').focus();
+                            // Scroll to the RW section
+                            $('html, body').animate({
+                                scrollTop: $('#rw-section').offset().top - 100
+                            }, 1000);
+                        } else if (focusField === 'rt') {
+                            // For RT focus, we need to ensure RW is selected first
+                            const currentRW = $('#rw-select').val();
+                            if (currentRW) {
+                                $('#rt-select').focus();
+                                $('html, body').animate({
+                                    scrollTop: $('#rt-section').offset().top - 100
+                                }, 1000);
+                            } else {
+                                // Focus on RW first if not selected
+                                $('#rw-select').focus();
+                                $('html, body').animate({
+                                    scrollTop: $('#rw-section').offset().top - 100
+                                }, 1000);
+
+                                // Show alert
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Pilih RW Terlebih Dahulu',
+                                    text: 'Silakan pilih RW terlebih dahulu sebelum memilih RT.',
+                                    confirmButtonText: 'Mengerti'
+                                });
+                            }
+                        }
+                    }, 500);
+                }, 300);
+            }
+
+            // RW Selection Change Handler
+            $('#rw-select').on('change', function() {
+                const selectedRW = $(this).val();
+                const userRole = '{{ Auth::user()->role }}';
+
+                // Clear RT selection when RW changes
+                $('#rt-select').empty().append('<option value="">Pilih RT</option>').prop('disabled', true);
+
+                if (selectedRW) {
+                    // Load available RT for selected RW
+                    loadRTByRW(selectedRW);
+
+                    // Remove highlighting from RW section if user is Ketua RW
+                    if (userRole === 'Ketua RW') {
+                        $('#rw-section').removeClass('rt-rw-highlight pulse-animation');
+                    }
+
+                    // Show RT section highlighting if user is Ketua RT and RT not selected
+                    if (userRole === 'Ketua RT' && !$('#rt-select').val()) {
+                        $('#rt-section').addClass('rt-rw-highlight pulse-animation');
+                    }
+                } else {
+                    // Reset RT section highlighting
+                    $('#rt-section').removeClass('rt-rw-highlight pulse-animation');
+                }
+            });
+
+            // RT Selection Change Handler
+            $('#rt-select').on('change', function() {
+                const selectedRT = $(this).val();
+                const userRole = '{{ Auth::user()->role }}';
+
+                if (selectedRT && userRole === 'Ketua RT') {
+                    // Remove highlighting from RT section
+                    $('#rt-section').removeClass('rt-rw-highlight pulse-animation');
+                }
+            });
+
+            // Function to load RT options based on selected RW
+            function loadRTByRW(rwValue) {
+                $.ajax({
+                    url: "{{ route('profile.getRtByRw') }}",
+                    method: 'GET',
+                    data: { rw: rwValue },
+                    beforeSend: function() {
+                        $('#rt-select').prop('disabled', true);
+                        $('#rt-select').empty().append('<option value="">Loading...</option>');
+                    },
+                    success: function(response) {
+                        $('#rt-select').empty().append('<option value="">Pilih RT</option>');
+
+                        if (response.success && response.data.length > 0) {
+                            response.data.forEach(function(rt) {
+                                $('#rt-select').append(new Option(rt.label, rt.value));
+                            });
+                            $('#rt-select').prop('disabled', false);
+
+                            // Set current RT value if exists
+                            const currentRT = '{{ Auth::user()->rt }}';
+                            if (currentRT) {
+                                $('#rt-select').val(currentRT);
+                            }
+                        } else {
+                            $('#rt-select').append('<option value="">Tidak ada RT tersedia</option>');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error loading RT:', xhr);
+                        $('#rt-select').empty().append('<option value="">Error loading RT</option>');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Gagal memuat data RT',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                });
+            }
+
+            // Initialize RW-RT on edit mode
+            function initializeRwRt() {
+                const currentRW = '{{ Auth::user()->rw }}';
+                const currentRT = '{{ Auth::user()->rt }}';
+
+                // Set current RW if exists
+                if (currentRW) {
+                    $('#rw-select').val(currentRW).trigger('change');
+
+                    // After RW is set, load and set RT
+                    if (currentRT) {
+                        setTimeout(() => {
+                            loadRTByRW(currentRW);
+                            setTimeout(() => {
+                                $('#rt-select').val(currentRT);
+                            }, 500);
+                        }, 100);
+                    }
+                }
+            }
+
+            // Function to update stats
+            function updateUserStats() {
+                $.ajax({
+                    url: "{{ route('profile.stats') }}",
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#total-pengajuan').text(response.data.total_pengajuan);
+                            $('#total-selesai').text(response.data.selesai);
+                            $('#total-proses').text(response.data.proses);
+                            $('#total-ditolak').text(response.data.ditolak);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log('Error updating stats:', xhr);
+                    }
+                });
+            }
+
+            // Update stats every 30 seconds
+            setInterval(updateUserStats, 30000);
+
+            // Update stats when page becomes visible (user switches back to tab)
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    updateUserStats();
+                }
+            });
+
+            // Update stats when window gains focus
+            $(window).on('focus', function() {
+                updateUserStats();
+            });
+
+            $('#refresh-stats').on('click', function() {
+                const btn = $(this);
+                const icon = btn.find('i');
+
+                // Add loading animation
+                icon.addClass('fa-spin');
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: "{{ route('profile.stats') }}",
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#total-pengajuan').text(response.data.total_pengajuan);
+                            $('#total-selesai').text(response.data.selesai);
+                            $('#total-proses').text(response.data.proses);
+                            $('#total-ditolak').text(response.data.ditolak);
+
+                            // Show success feedback
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Statistik Diperbarui',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal memperbarui statistik',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    },
+                    complete: function() {
+                        // Remove loading animation
+                        icon.removeClass('fa-spin');
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+
+            loadRecentActivities();
+
+            // Refresh activities button
+            $('#refresh-activities').on('click', function() {
+                loadRecentActivities();
+            });
+
+            // Auto refresh activities every 60 seconds
+            setInterval(function() {
+                loadRecentActivities();
+            }, 60000);
+
+            function loadRecentActivities() {
+                const btn = $('#refresh-activities');
+                const icon = btn.find('i');
+
+                // Add loading animation
+                icon.addClass('fa-spin');
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: "{{ route('profile.activities') }}",
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            updateActivitiesDisplay(response.data);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error loading activities:', xhr);
+                    },
+                    complete: function() {
+                        // Remove loading animation
+                        icon.removeClass('fa-spin');
+                        btn.prop('disabled', false);
+                    }
+                });
+            }
+
+            function updateActivitiesDisplay(activities) {
+                const activitiesList = $('#activities-list');
+                const loadingActivities = $('#loading-activities');
+                const viewAllContainer = $('#view-all-container');
+                const noActivities = $('#no-activities');
+
+                // Hide loading
+                loadingActivities.hide();
+
+                if (activities.length === 0) {
+                    activitiesList.empty();
+                    viewAllContainer.hide();
+                    noActivities.show();
+                    return;
+                }
+
+                // Clear existing activities
+                activitiesList.empty();
+                noActivities.hide();
+
+                // Add activities (vertical display with scrollbar if more than container height)
+                activities.forEach(function(activity) {
+                    const activityHtml = createActivityHtml(activity);
+                    activitiesList.append(activityHtml);
+                });
+
+                // Update View All button based on user role
+                updateViewAllButton();
+
+                // Show view all button
+                viewAllContainer.show();
+            }
+
+            function updateViewAllButton() {
+                const userRole = '{{ Auth::user()->role }}';
+                const viewAllContainer = $('#view-all-container');
+
+                let buttonHtml = '';
+
+                if (userRole === 'user') {
+                    // Regular users go to user-applications (their unified application view)
+                    buttonHtml = `
+                        <a href="{{ route('user-applications.index') }}" class="btn btn-primary btn-lg btn-round">
+                            <i class="fas fa-list"></i> View All Permohonan
+                        </a>
+                    `;
+                } else if (['Ketua RT', 'Ketua RW'].includes(userRole)) {
+                    // RT/RW can access both their personal applications and approval tasks
+                    buttonHtml = `
+                        <div class="btn-group" role="group">
+                            <a href="{{ route('user-applications.index') }}" class="btn btn-primary btn-lg btn-round">
+                                <i class="fas fa-user"></i> Permohonan Saya
+                            </a>
+                            <a href="{{ route('user-applications.index-all') }}" class="btn btn-outline-primary btn-lg btn-round ml-2">
+                                <i class="fas fa-tasks"></i> All Applications
+                            </a>
+                        </div>
+                    `;
+                } else if (['Front Office', 'Back Office', 'Lurah'].includes(userRole)) {
+                    // These roles only deal with all applications for approval, not personal applications
+                    buttonHtml = `
+                        <a href="{{ route('user-applications.index-all') }}" class="btn btn-primary btn-lg btn-round">
+                            <i class="fas fa-tasks"></i> View All Applications
+                        </a>
+                    `;
+                } else {
+                    // Admin and other roles see all applications
+                    buttonHtml = `
+                        <a href="{{ route('user-applications.index-all') }}" class="btn btn-primary btn-lg btn-round">
+                            <i class="fas fa-list"></i> View All Applications
+                        </a>
+                    `;
+                }
+
+                viewAllContainer.html(buttonHtml);
+            }
+
+            function createActivityHtml(activity) {
+                const userRole = '{{ Auth::user()->role }}';
+                let actionColor = 'text-primary';
+                let actionIcon = 'fa-file-alt';
+
+                // Set colors and icons based on action
+                if (activity.action === 'menyetujui') {
+                    actionColor = 'text-success';
+                    actionIcon = 'fa-check-circle';
+                } else if (activity.action === 'menolak') {
+                    actionColor = 'text-danger';
+                    actionIcon = 'fa-times-circle';
+                } else if (activity.action === 'mengajukan') {
+                    actionColor = 'text-info';
+                    actionIcon = 'fa-paper-plane';
+                } else if (activity.action === 'status') {
+                    actionColor = 'text-warning';
+                    actionIcon = 'fa-clock';
+                }
+
+                let description = '';
+
+                if (userRole === 'user') {
+                    // For regular users
+                    if (activity.action === 'mengajukan') {
+                        description = `
+                            <span class="${actionColor}">
+                                <i class="fas ${actionIcon}"></i>
+                                Anda mengajukan
+                            </span>
+                            permohonan ${activity.subject} (${activity.nomor_surat})
+                        `;
+                    } else if (activity.action === 'status') {
+                        description = `
+                            <span class="${actionColor}">
+                                <i class="fas ${actionIcon}"></i>
+                                Status terkini:
+                            </span>
+                            ${activity.subject} - ${activity.note}
+                        `;
+                    } else {
+                        description = `
+                            <span class="${actionColor}">
+                                <i class="fas ${actionIcon}"></i>
+                                ${activity.action.charAt(0).toUpperCase() + activity.action.slice(1)}
+                            </span>
+                            permohonan ${activity.subject} (${activity.nomor_surat})
+                            ${activity.level ? 'oleh ' + activity.level : ''}
+                        `;
+
+                        if (activity.note) {
+                            description += `<br><small class="text-muted">"${activity.note}"</small>`;
+                        }
+                    }
+                } else {
+                    // For RT/RW/Admin
+                    if (activity.action === 'mengajukan') {
+                        description = `
+                            <span class="${actionColor}">
+                                <i class="fas ${actionIcon}"></i>
+                                Permohonan baru
+                            </span>
+                            ${activity.subject} dari
+                            <strong>${activity.pemohon || 'Pemohon'}</strong>
+                        `;
+                    } else {
+                        description = `
+                            <span class="${actionColor}">
+                                <i class="fas ${actionIcon}"></i>
+                                ${activity.action.charAt(0).toUpperCase() + activity.action.slice(1)}
+                            </span>
+                            permohonan ${activity.subject} dari
+                            <strong>${activity.pemohon || 'Pemohon'}</strong>
+                            ${activity.level ? ' oleh ' + activity.level : ''}
+                        `;
+
+                        if (activity.note) {
+                            description += `<br><small class="text-muted">"${activity.note}"</small>`;
+                        }
+                    }
+                }
+
+                // Add status badge if needed
+                let statusBadge = '';
+                if (activity.status) {
+                    const statusColors = {
+                        'pending_rt': 'warning',
+                        'approved_rt': 'info',
+                        'rejected_rt': 'danger',
+                        'pending_rw': 'warning',
+                        'approved_rw': 'info',
+                        'rejected_rw': 'danger',
+                        'pending_kelurahan': 'warning',
+                        'approved_kelurahan': 'success',
+                        'rejected_kelurahan': 'danger',
+                        'completed': 'success'
+                    };
+
+                    const badgeColor = statusColors[activity.status] || 'secondary';
+                    statusBadge = `<br><span class="badge badge-${badgeColor} mt-1">${activity.status.replace('_', ' ').toUpperCase()}</span>`;
+                }
+
+                return `
+                    <li class="media">
+                        <img class="rounded-circle mr-3"
+                            width="50"
+                            src="{{ asset('${activity.avatar}') }}"
+                            alt="avatar"
+                            onerror="this.src='{{ asset('img/avatar/avatar-1.png') }}'">
+                        <div class="media-body">
+                            <div class="text-primary float-right">${activity.time_human}</div>
+                            <div class="media-title">${activity.actor.name}</div>
+                            <span class="text-small text-muted">
+                                ${description}
+                                ${statusBadge}
+                            </span>
+                        </div>
+                    </li>
+                `;
+            }
 
             // Toggle edit mode
             $('#btn-edit').click(function(e) {
@@ -413,8 +1247,8 @@
                 if (!isEditMode) {
                     // Masuk mode edit
                     initializeSelect2();
-                    // loadProvinsi();
                     loadInitialData();
+                    initializeRwRt();
 
                     // Initialize summernote hanya jika belum diinisialisasi
                     if (!summernoteInitialized) {
@@ -469,8 +1303,6 @@
                 $('#btn-edit').toggleClass('btn-primary btn-secondary');
                 $('#btn-edit').find('i').toggleClass('fa-edit fa-times');
 
-                // Reset semua select2
-                // resetAllDropdowns();
                 // Destroy summernote saat cancel
                 if (summernoteInitialized) {
                     $('.summernote-simple').summernote('destroy');
@@ -515,7 +1347,7 @@
                     },
                     error: function(xhr, status, error) {
                         console.error('Error loading provinces:', error);
-                        swal('Error', 'Gagal memuat data provinsi', 'error');
+                        Swal.fire('Error', 'Gagal memuat data provinsi', 'error');
                     }
                 });
             }
@@ -526,17 +1358,15 @@
                 const provinsiText = $(this).find("option:selected").text();
                 $('#provinsi-text').val(provinsiText);
 
-                if(provinsiId && provinsiId !== '1') { // '1' adalah value default kita untuk data dari DB
+                if(provinsiId && provinsiId !== '1') {
                     loadKota(provinsiId);
                 } else if (provinsiId === '1') {
-                    // Jika ini adalah nilai dari database, jangan reset dropdown lain
                     return;
                 } else {
                     resetDropdowns('kota');
                 }
             });
 
-            // Tambahkan event handler untuk kota
             $('#kota').on('change', function() {
                 const kotaId = $(this).val();
                 const kotaText = $(this).find("option:selected").text();
@@ -551,7 +1381,6 @@
                 }
             });
 
-            // Tambahkan event handler untuk kecamatan
             $('#kecamatan').on('change', function() {
                 const kecamatanId = $(this).val();
                 const kecamatanText = $(this).find("option:selected").text();
@@ -566,7 +1395,6 @@
                 }
             });
 
-            // Event handler untuk kelurahan
             $('#kelurahan').on('change', function() {
                 const kelurahanText = $(this).find("option:selected").text();
                 $('#kelurahan-text').val(kelurahanText);
@@ -592,7 +1420,7 @@
                     },
                     error: function(xhr, status, error) {
                         console.error('Error loading cities:', error);
-                        swal('Error', 'Gagal memuat data kota', 'error');
+                        Swal.fire('Error', 'Gagal memuat data kota', 'error');
                     }
                 });
             }
@@ -617,7 +1445,7 @@
                     },
                     error: function(xhr, status, error) {
                         console.error('Error loading districts:', error);
-                        swal('Error', 'Gagal memuat data kecamatan', 'error');
+                        Swal.fire('Error', 'Gagal memuat data kecamatan', 'error');
                     }
                 });
             }
@@ -642,7 +1470,7 @@
                     },
                     error: function(xhr, status, error) {
                         console.error('Error loading villages:', error);
-                        swal('Error', 'Gagal memuat data kelurahan', 'error');
+                        Swal.fire('Error', 'Gagal memuat data kelurahan', 'error');
                     }
                 });
             }
@@ -657,10 +1485,9 @@
                     const kelurahanText = $('#kelurahan-text').val();
 
                     // Load provinsi
-                    await loadProvinsi();
+                    if (provinsiText && provinsiText !== '-') {
+                        await loadProvinsi();
 
-                    // Jika ada provinsi tersimpan
-                    if (provinsiText) {
                         // Cari provinsi yang cocok
                         const provinsiOption = $('#provinsi option').filter(function() {
                             return $(this).text().toLowerCase() === provinsiText.toLowerCase();
@@ -670,7 +1497,7 @@
                             $('#provinsi').val(provinsiOption.val()).trigger('change');
 
                             // Load dan set kota jika ada
-                            if (kotaText) {
+                            if (kotaText && kotaText !== '-') {
                                 await loadKota(provinsiOption.val());
                                 const kotaOption = $('#kota option').filter(function() {
                                     return $(this).text().toLowerCase() === kotaText.toLowerCase();
@@ -680,7 +1507,7 @@
                                     $('#kota').val(kotaOption.val()).trigger('change');
 
                                     // Load dan set kecamatan jika ada
-                                    if (kecamatanText) {
+                                    if (kecamatanText && kecamatanText !== '-') {
                                         await loadKecamatan(kotaOption.val());
                                         const kecamatanOption = $('#kecamatan option').filter(function() {
                                             return $(this).text().toLowerCase() === kecamatanText.toLowerCase();
@@ -690,7 +1517,7 @@
                                             $('#kecamatan').val(kecamatanOption.val()).trigger('change');
 
                                             // Load dan set kelurahan jika ada
-                                            if (kelurahanText) {
+                                            if (kelurahanText && kelurahanText !== '-') {
                                                 await loadKelurahan(kecamatanOption.val());
                                                 const kelurahanOption = $('#kelurahan option').filter(function() {
                                                     return $(this).text().toLowerCase() === kelurahanText.toLowerCase();
@@ -708,7 +1535,7 @@
                     }
                 } catch (error) {
                     console.error('Error loading initial data:', error);
-                    swal('Error', 'Gagal memuat data alamat', 'error');
+                    Swal.fire('Error', 'Gagal memuat data alamat', 'error');
                 }
             }
 
@@ -733,7 +1560,46 @@
                 }
             }
 
-            $('#form-profile').submit(function(e) {
+            // Form submission
+            $('#form-profile').on('submit', function(e) {
+                const userRole = '{{ Auth::user()->role }}';
+                const selectedRW = $('#rw-select').val();
+                const selectedRT = $('#rt-select').val();
+
+                // Validate required fields for specific roles
+                if (userRole === 'Ketua RW' && !selectedRW) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'RW Wajib Diisi',
+                        text: 'Sebagai Ketua RW, Anda wajib mengisi informasi RW.',
+                        confirmButtonText: 'Mengerti'
+                    });
+                    $('#rw-select').focus();
+                    return false;
+                }
+
+                if (userRole === 'Ketua RT' && (!selectedRW || !selectedRT)) {
+                    e.preventDefault();
+                    let message = 'Sebagai Ketua RT, Anda wajib mengisi informasi ';
+                    if (!selectedRW) {
+                        message += 'RW terlebih dahulu.';
+                        $('#rw-select').focus();
+                    } else if (!selectedRT) {
+                        message += 'RT.';
+                        $('#rt-select').focus();
+                    }
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Tidak Lengkap',
+                        text: message,
+                        confirmButtonText: 'Mengerti'
+                    });
+                    return false;
+                }
+
+                // Continue with normal form submission
                 e.preventDefault();
 
                 let formData = new FormData(this);
@@ -745,9 +1611,7 @@
                     contentType: false,
                     processData: false,
                     beforeSend: function() {
-                        // Disable submit button
                         $('button[type="submit"]').prop('disabled', true);
-                        // Show loading state if desired
                         Swal.fire({
                             title: 'Loading...',
                             allowOutsideClick: false,
@@ -757,7 +1621,6 @@
                         });
                     },
                     success: function(response) {
-                        // Enable submit button
                         $('button[type="submit"]').prop('disabled', false);
 
                         if (response.status === 'success') {
@@ -781,13 +1644,17 @@
                                 $('#btn-edit').removeClass('btn-secondary').addClass('btn-primary');
                                 $('#btn-edit').find('i').removeClass('fa-times').addClass('fa-edit');
 
-                                // Reload page to show updated data
-                                window.location.reload();
+                                // Redirect to clean URL without parameters
+                                if (response.redirect_url) {
+                                    window.location.href = response.redirect_url;
+                                } else {
+                                    // Fallback: reload with clean URL
+                                    window.location.href = '{{ route("Profile.index") }}';
+                                }
                             });
                         }
                     },
                     error: function(xhr) {
-                        // Enable submit button
                         $('button[type="submit"]').prop('disabled', false);
 
                         let message = 'Terjadi kesalahan saat memperbarui profile';
@@ -803,6 +1670,8 @@
                     }
                 });
             });
+
+            console.log('✅ Profile page initialized successfully');
         });
     </script>
 

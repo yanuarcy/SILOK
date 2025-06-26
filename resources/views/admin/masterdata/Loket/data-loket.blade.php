@@ -395,7 +395,7 @@
         });
 
         function createLoket() {
-            window.location.href = "{{ route('lokets.create') }}";
+            window.location.href = "{{ route('Loket.create') }}";
         }
     </script>
 

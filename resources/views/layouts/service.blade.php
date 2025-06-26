@@ -12,7 +12,7 @@
                         <div class="service-icon">
                             <i class="bi bi-info-circle fa-2x"></i>
                         </div>
-                        <a class="service-btn" href="">
+                        <a class="service-btn" href="{{ route('informasi-umum.index') }}">
                             <i class="fa fa-link fa-2x"></i>
                         </a>
                     </div>
@@ -44,7 +44,7 @@
                         <div class="service-icon">
                             <i class="bi bi-envelope-open fa-2x"></i>
                         </div>
-                        <a class="service-btn" href="">
+                        <a class="service-btn" href="{{ route('psu.create') }}">
                             <i class="fa fa-link fa-2x"></i>
                         </a>
                     </div>
@@ -60,7 +60,7 @@
                         <div class="service-icon">
                             <i class="fas fa-database text-white fa-2x"></i>
                         </div>
-                        <a class="service-btn" href="">
+                        <a class="service-btn" href="{{ route('bankdata.index') }}">
                             <i class="fa fa-link fa-2x"></i>
                         </a>
                     </div>
@@ -76,7 +76,7 @@
                         <div class="service-icon">
                             <i class="bi bi-journal-text fa-2x"></i>
                         </div>
-                        <a class="service-btn" href="">
+                        <a class="service-btn" href="{{ route('perpu.index') }}">
                             <i class="fa fa-link fa-2x"></i>
                         </a>
                     </div>
@@ -92,7 +92,7 @@
                         <div class="service-icon">
                             <i class="fa fa-smile-beam text-white fa-2x"></i>
                         </div>
-                        <a class="service-btn" href="">
+                        <a class="service-btn" href="{{ route('skm.create') }}">
                             <i class="fa fa-link fa-2x"></i>
                         </a>
                     </div>

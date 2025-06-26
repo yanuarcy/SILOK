@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
 class Loket extends Model
@@ -73,13 +74,19 @@ class Loket extends Model
      */
     public function isOnline()
     {
-        $session = $this->session()->latest('last_activity')->first();
+        // $session = $this->session()->latest('last_activity')->first();
 
-        if (!$session || !$session->last_activity) {
+        // if (!$session || !$session->last_activity) {
+        //     return false;
+        // }
+
+        // return Carbon::parse($session->last_activity)->diffInMinutes(now()) < 5;
+
+        if (!$this->user_id) {
             return false;
         }
 
-        return Carbon::parse($session->last_activity)->diffInMinutes(now()) < 5;
+        return Cache::has('user-online.'.$this->user_id);
     }
 
     /**

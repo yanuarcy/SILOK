@@ -227,11 +227,13 @@
         <section class="section">
             <div class="section-header">
                 <h1>Data Layanan</h1>
-                <div class="section-header-button">
-                    <a href="{{ route('layanan.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Tambah Layanan
-                    </a>
-                </div>
+                @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator'))
+                    <div class="section-header-button">
+                        <a href="{{ route('layanan.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Layanan
+                        </a>
+                    </div>
+                @endif
             </div>
 
             <div class="row">
@@ -247,6 +249,7 @@
                                             <th>Image</th>
                                             <th>Description</th>
                                             <th>Small</th>
+                                            <th>Kode Layanan</th>
                                             <th>Has Sub Layanan</th>
                                             <th>Created At</th>
                                             <th>Actions</th>
@@ -297,6 +300,8 @@
 
     <script>
         $(document).ready(function() {
+            const isAuthorized = {{ auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator') ? 'true' : 'false' }};
+
             const table = $('#layanan-table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -327,9 +332,10 @@
                     {data: 'image', name: 'image', orderable: false, searchable: false},
                     {data: 'description', name: 'description'},
                     {data: 'small', name: 'small'},
-                    {data: 'has_sub_layanan', name: 'has_sub_layanan'},
+                    {data: 'kode_layanan', name: 'kode_layanan', className: 'text-center pr-4'},
+                    {data: 'has_sub_layanan', name: 'has_sub_layanan', className: 'text-center pr-4'},
                     {data: 'created_at', name: 'created_at'},
-                    {data: 'actions', name: 'actions', orderable: false, searchable: false}
+                    {data: 'actions', name: 'actions', orderable: false, searchable: false, visible: isAuthorized}
                 ],
                 order: [[0, 'asc']], // Default sort
                 responsive: true,

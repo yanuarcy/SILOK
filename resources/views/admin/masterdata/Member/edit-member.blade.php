@@ -94,7 +94,11 @@
                                         <option value="user" {{ old('role', $member->role) == 'user' ? 'selected' : '' }}>User</option>
                                         <option value="Front Office" {{ old('role', $member->role) == 'Front Office' ? 'selected' : '' }}>Front Office</option>
                                         <option value="Back Office" {{ old('role', $member->role) == 'Back Office' ? 'selected' : '' }}>Back Office</option>
-                                        <option value="Editor" {{ old('role', $member->role) == 'Editor' ? 'selected' : '' }}>Editor</option>
+                                        <option value="Ketua RT" {{ old('role', $member->role) == 'Ketua RT' ? 'selected' : '' }}>Ketua RT</option>
+                                        <option value="Ketua RW" {{ old('role', $member->role) == 'Ketua RW' ? 'selected' : '' }}>Ketua RW</option>
+                                        <option value="Lurah" {{ old('role', $member->role) == 'Lurah' ? 'selected' : '' }}>Lurah</option>
+                                        <option value="Camat" {{ old('role', $member->role) == 'Camat' ? 'selected' : '' }}>Camat</option>
+                                        <option value="Operator" {{ old('role', $member->role) == 'Operator' ? 'selected' : '' }}>Operator</option>
                                         <option value="admin" {{ old('role', $member->role) == 'admin' ? 'selected' : '' }}>Admin</option>
                                     </select>
                                     @error('role')

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Session;
 use App\Models\VerificationCode;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MailOTP;
@@ -16,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Cache;
 
 class LoginController extends Controller
 {
@@ -297,6 +300,14 @@ class LoginController extends Controller
                     $sessionId = session()->getId();
                     $now = now();
 
+                    $userID = auth()->id();
+
+                    // Simpan status online (akan otomatis hapus setelah 120 menit)
+                    Cache::put('user-online.'.$userID, true, now()->addMinutes(120));
+
+                    // Simpan last_seen (bertahan selama 30 hari)
+                    Cache::put('user-last-seen.'.$userID, now(), now()->addDays(30));
+
                     $session = Session::where('id', $sessionId)->first();
 
                     if ($session) {
@@ -358,6 +369,27 @@ class LoginController extends Controller
                     }
                 }
 
+                // Check if profile is complete for RT/RW roles
+                $needsProfileUpdate = false;
+                if (in_array($user->role, ['Ketua RT', 'Ketua RW'])) {
+                    $needsProfileUpdate = !ProfileController::isProfileComplete($user);
+                }
+
+                // Store profile update flag in session
+                if ($needsProfileUpdate) {
+                    session(['needs_profile_update' => true, 'profile_role' => $user->role]);
+                }
+
+                ActivityLog::log('login', "Masuk ke sistem", $user, [
+                    'login_time' => now(),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'browser' => $this->getBrowserName($request->userAgent()),
+                    'platform' => $this->getPlatformName($request->userAgent()),
+                    'user_role' => $user->role,
+                    'activity_type' => 'login'
+                ]);
+
                 // Role-based redirection
                 if ($user->role === 'admin') {
                     toast('Login Successfully as Admin','success');
@@ -407,6 +439,16 @@ class LoginController extends Controller
     {
         // Ambil user sebelum logout
         $user = Auth::user();
+        ActivityLog::log('logout', "Keluar dari sistem", $user, [
+            'logout_time' => now(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'activity_type' => 'logout'
+        ]);
+
+        $userId = auth()->id();
+        // Hapus status online
+        Cache::forget('user-online.'.$userId);
 
         // Lakukan logout
         Auth::logout();
@@ -432,6 +474,44 @@ class LoginController extends Controller
         }
 
         return redirect('/');
+    }
+
+    /**
+     * Get browser name from user agent
+     */
+    private function getBrowserName($userAgent)
+    {
+        if (strpos($userAgent, 'Chrome') !== false) {
+            return 'Google Chrome';
+        } elseif (strpos($userAgent, 'Firefox') !== false) {
+            return 'Mozilla Firefox';
+        } elseif (strpos($userAgent, 'Safari') !== false) {
+            return 'Safari';
+        } elseif (strpos($userAgent, 'Edge') !== false) {
+            return 'Microsoft Edge';
+        } else {
+            return 'Browser Lain';
+        }
+    }
+
+    /**
+     * Get platform name from user agent
+     */
+    private function getPlatformName($userAgent)
+    {
+        if (strpos($userAgent, 'Windows') !== false) {
+            return 'Windows';
+        } elseif (strpos($userAgent, 'Mac') !== false) {
+            return 'macOS';
+        } elseif (strpos($userAgent, 'Linux') !== false) {
+            return 'Linux';
+        } elseif (strpos($userAgent, 'Android') !== false) {
+            return 'Android';
+        } elseif (strpos($userAgent, 'iPhone') !== false) {
+            return 'iOS';
+        } else {
+            return 'Platform Lain';
+        }
     }
 
     // public function showLoginForm () {

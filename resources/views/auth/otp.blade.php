@@ -100,7 +100,7 @@
                         </div>
 
                         <div class="card-body">
-                            <p class="">Kode OTP telah dikirim ke email <b>{{ $email }}</b>. Silakan masukkan kode OTP di bawah ini.</p>
+                            <p class="">Kode OTP telah dikirim ke email <b>{{ $email }}</b> dan silahkan buka bagian spam jika tidak ada email masuk. Silakan masukkan kode OTP di bawah ini.</p>
                             <p>Kode OTP akan kadaluarsa dalam 1 menit.</p>
                             <form id="otpForm" method="POST" action="{{ isset($id) ? route('otp.verify', $id) : route('register.verify-otp', $email) }}">
                                 @csrf

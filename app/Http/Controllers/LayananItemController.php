@@ -16,8 +16,14 @@ class LayananItemController extends Controller
     {
         $query = LayananItem::with('subLayanan');
 
+        $isAuthorized = auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator');
+
         return DataTables::of($query)
-            ->addColumn('actions', function($item) {
+            ->addColumn('actions', function($item) use ($isAuthorized) {
+                if (!$isAuthorized) {
+                    return '';
+                }
+
                 return '
                     <div class="d-flex justify-content-center gap-2">
                         <a href="'.route('layanan-item.edit', $item->id).'" class="btn btn-warning btn-sm">

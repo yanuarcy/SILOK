@@ -148,6 +148,8 @@ class ApplicantTypeController extends Controller
         try {
             $applicantTypes = ApplicantType::query();
 
+            $isAuthorized = auth()->user() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator');
+
             return DataTables::of($applicantTypes)
                 ->addIndexColumn()
                 ->addColumn('image', function ($row) {
@@ -158,7 +160,11 @@ class ApplicantTypeController extends Controller
                 ->addColumn('created_at', function ($row) {
                     return $row->created_at ? $row->created_at->format('d F Y') : '-';
                 })
-                ->addColumn('actions', function ($row) {
+                ->addColumn('actions', function ($row) use ($isAuthorized) {
+                    if (!$isAuthorized) {
+                        return '';
+                    }
+
                     $edit = '<a href="' . route('applicant-types.edit', $row->id) . '" class="btn btn-warning btn-sm"><i class="fas fa-pencil-alt"></i></a>';
                     $delete = '<form action="' . route('applicant-types.destroy', $row->id) . '" method="POST" class="d-inline">
                         ' . csrf_field() . '

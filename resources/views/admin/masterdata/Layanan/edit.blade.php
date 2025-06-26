@@ -91,14 +91,71 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
+                                            <label>Kode Layanan <span class="text-danger">*</span></label>
+                                            <select class="form-control @error('kode_layanan') is-invalid @enderror"
+                                                    name="kode_layanan" id="kodeLayanan" required>
+                                                <option value="">Pilih Kode Layanan</option>
+                                                @foreach(range('A', 'Z') as $letter)
+                                                    <option value="{{ $letter }}"
+                                                        {{ old('kode_layanan', $layanan->kode_layanan) == $letter ? 'selected' : '' }}>
+                                                        {{ $letter }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('kode_layanan')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <div id="kodeInfo" class="kode-info kode-current"
+                                                 style="{{ $layanan->kode_layanan ? '' : 'display: none;' }}">
+                                                @if($layanan->kode_layanan)
+                                                    <i class="fas fa-info-circle"></i>
+                                                    <strong>Kode saat ini: {{ $layanan->kode_layanan }}</strong><br>
+                                                    <small>Kode ini sedang digunakan untuk layanan ini</small>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{-- <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Image</label>
+                                        @if($layanan->image)
+                                            <div class="mb-2">
+                                                <img src="{{ asset('img/layanan/' . $layanan->image) }}" height="100">
+                                            </div>
+                                        @endif
+                                        <input type="file" class="form-control @error('image') is-invalid @enderror" name="image">
+                                        @error('image')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div> --}}
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
                                             <label>Image</label>
                                             @if($layanan->image)
                                                 <div class="mb-2">
-                                                    <img src="{{ asset('img/layanan/' . $layanan->image) }}" height="100">
+                                                    <img src="{{ asset('img/layanan/' . $layanan->image) }}" height="100" class="img-thumbnail">
+                                                    <small class="d-block text-muted">Gambar saat ini</small>
                                                 </div>
                                             @endif
-                                            <input type="file" class="form-control @error('image') is-invalid @enderror" name="image">
+                                            <input type="file" class="form-control @error('image') is-invalid @enderror"
+                                                   name="image" accept="image/*">
                                             @error('image')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <small class="form-text text-muted">Format: JPEG, PNG, JPG, GIF, SVG. Max: 2MB. Kosongkan jika tidak ingin mengubah gambar.</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Small Text <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control @error('small') is-invalid @enderror"
+                                                   name="small" value="{{ old('small', $layanan->small) }}" required
+                                                   placeholder="Teks pendek untuk deskripsi singkat">
+                                            @error('small')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -114,14 +171,14 @@
                                     @enderror
                                 </div>
 
-                                <div class="form-group">
+                                {{-- <div class="form-group">
                                     <label>Small Text</label>
                                     <input type="text" class="form-control @error('small') is-invalid @enderror"
                                            name="small" value="{{ old('small', $layanan->small) }}" required>
                                     @error('small')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div>
+                                </div> --}}
 
                                 <div class="form-group">
                                     <div class="custom-control custom-checkbox">
@@ -187,6 +244,91 @@
     <script src="{{ asset('js/page/index-0.js') }}"></script>
     <script>
         $(document).ready(function() {
+
+            const currentKode = '{{ $layanan->kode_layanan }}';
+            const layananId = '{{ $layanan->id }}';
+
+            let checkKodeTimeout;
+            $('#kodeLayanan').change(function() {
+                const selectedKode = $(this).val();
+                const infoDiv = $('#kodeInfo');
+
+                clearTimeout(checkKodeTimeout);
+
+                if (selectedKode) {
+                    // Jika kode sama dengan kode saat ini
+                    if (selectedKode === currentKode) {
+                        infoDiv.removeClass('kode-unavailable kode-available').addClass('kode-current');
+                        infoDiv.html(`
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Kode saat ini: ${selectedKode}</strong><br>
+                            <small>Kode ini sedang digunakan untuk layanan ini</small>
+                        `);
+                        infoDiv.show();
+                        return;
+                    }
+
+                    // Show loading state
+                    infoDiv.removeClass('kode-unavailable kode-available kode-current');
+                    infoDiv.html(`
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <small>Memeriksa ketersediaan kode ${selectedKode}...</small>
+                    `);
+                    infoDiv.show();
+
+                    checkKodeTimeout = setTimeout(function() {
+                        $.ajax({
+                            url: '{{ route("layanan.checkKode") }}',
+                            method: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                kode: selectedKode,
+                                exclude_id: layananId // Exclude current layanan
+                            },
+                            success: function(response) {
+                                console.log('Check kode response:', response);
+
+                                if (response.available) {
+                                    infoDiv.removeClass('kode-unavailable kode-current').addClass('kode-available');
+                                    infoDiv.html(`
+                                        <i class="fas fa-check-circle"></i>
+                                        <strong>Kode ${selectedKode} tersedia</strong><br>
+                                        <small>Kode ini dapat digunakan untuk layanan ini</small>
+                                    `);
+                                } else {
+                                    infoDiv.removeClass('kode-available kode-current').addClass('kode-unavailable');
+                                    infoDiv.html(`
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <strong>Kode ${selectedKode} sudah digunakan</strong><br>
+                                        <small>Digunakan untuk: <strong>${response.used_by || 'Layanan tidak diketahui'}</strong></small>
+                                    `);
+                                }
+                                infoDiv.show();
+                            },
+                            error: function(xhr) {
+                                console.error('Error checking kode:', xhr.responseJSON);
+
+                                infoDiv.removeClass('kode-available kode-current').addClass('kode-unavailable');
+                                let errorMessage = 'Tidak dapat memeriksa ketersediaan kode';
+
+                                if (xhr.responseJSON && xhr.responseJSON.message) {
+                                    errorMessage = xhr.responseJSON.message;
+                                }
+
+                                infoDiv.html(`
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Error:</strong><br>
+                                    <small>${errorMessage}</small>
+                                `);
+                                infoDiv.show();
+                            }
+                        });
+                    }, 500);
+                } else {
+                    infoDiv.hide();
+                }
+            });
+
             // Show/hide new sub layanan section based on checkbox
             $('#hasSubLayanan').change(function() {
                 $('#newSubLayananSection').toggle(this.checked);
@@ -247,6 +389,29 @@
             $('form').submit(function(e) {
                 e.preventDefault();
 
+                // ✅ Validasi kode layanan
+                const selectedKode = $('#kodeLayanan').val();
+                if (!selectedKode) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Kode Layanan Required!',
+                        text: 'Silakan pilih kode layanan terlebih dahulu!',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                // ✅ Validasi apakah kode tersedia (kecuali kode saat ini)
+                if ($('#kodeInfo').hasClass('kode-unavailable')) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Kode Layanan Tidak Tersedia!',
+                        text: 'Kode yang dipilih sudah digunakan. Silakan pilih kode lain!',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
                 // Get form data
                 const form = $(this);
                 const formData = new FormData(this);
@@ -262,6 +427,24 @@
                 // Add has_sub_layanan value explicitly
                 formData.set('has_sub_layanan', $('#hasSubLayanan').is(':checked') ? '1' : '0');
 
+                // Show loading
+                Swal.fire({
+                    title: 'Mengupdate Data...',
+                    html: `
+                        <div class="text-center">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <p>Mohon tunggu, data sedang diproses...</p>
+                        </div>
+                    `,
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 // Send AJAX request
                 $.ajax({
                     url: form.attr('action'),
@@ -269,36 +452,84 @@
                     data: formData,
                     processData: false,
                     contentType: false,
+                    timeout: 30000,
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                         'X-HTTP-Method-Override': 'PUT'
                     },
+                    beforeSend: function() {
+                        console.log('AJAX update request started');
+                    },
                     success: function(response) {
-                        console.log('Success:', response);
+                        console.log('AJAX update success:', response);
+
                         Swal.fire({
-                            title: 'Success!',
-                            text: 'Layanan updated successfully',
                             icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = "{{ route('masterdata.layanan') }}";
-                            }
+                            title: 'Berhasil!',
+                            html: `
+                                <div class="text-center">
+                                    <p><strong>${response.message || 'Layanan berhasil diupdate!'}</strong></p>
+                                    ${response.data ? `
+                                        <div class="mt-3 p-3 bg-light rounded">
+                                            <small class="text-muted">
+                                                <strong>ID:</strong> ${response.data.id || layananId}<br>
+                                                <strong>Title:</strong> ${response.data.title || 'Updated'}<br>
+                                                <strong>Kode:</strong> ${selectedKode}
+                                            </small>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `,
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then(() => {
+                            window.location.href = "{{ route('masterdata.layanan') }}";
                         });
                     },
                     error: function(xhr, status, error) {
-                        console.error('Error:', xhr.responseText);
-                        let errorMessage = 'Something went wrong while updating';
+                        console.error('AJAX update error:', {xhr: xhr, status: status, error: error});
+                        console.error('Response:', xhr.responseJSON);
 
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
+                        let title = 'Oops...';
+                        let message = 'Terjadi kesalahan yang tidak diketahui!';
+                        let icon = 'error';
+
+                        if (xhr.status === 422) {
+                            title = 'Validasi Gagal!';
+                            icon = 'warning';
+
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                const errors = xhr.responseJSON.errors;
+                                message = '<ul class="text-left">';
+                                Object.keys(errors).forEach(function(key) {
+                                    errors[key].forEach(function(errorMsg) {
+                                        message += `<li>${errorMsg}</li>`;
+                                    });
+                                });
+                                message += '</ul>';
+                            }
+                        } else if (xhr.status === 500) {
+                            title = 'Server Error!';
+                            message = xhr.responseJSON && xhr.responseJSON.message
+                                ? xhr.responseJSON.message
+                                : 'Terjadi kesalahan pada server. Silakan coba lagi.';
+                        } else if (xhr.status === 0) {
+                            title = 'Koneksi Error!';
+                            message = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+                        } else {
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
                         }
 
                         Swal.fire({
-                            title: 'Error!',
-                            text: errorMessage,
-                            icon: 'error',
-                            confirmButtonText: 'OK'
+                            icon: icon,
+                            title: title,
+                            html: message,
+                            confirmButtonText: 'OK',
+                            footer: `<small class="text-muted">Status: ${xhr.status} ${xhr.statusText}</small>`
                         });
                     }
                 });
@@ -308,11 +539,41 @@
             $('input[type="file"]').change(function(e) {
                 const file = e.target.files[0];
                 if(file) {
+                    // Validate file size (2MB = 2048KB)
+                    if(file.size > 2048000) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'File Terlalu Besar!',
+                            text: 'Ukuran file maksimal 2MB'
+                        });
+                        $(this).val('');
+                        return;
+                    }
+
+                    // Validate file type
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/svg+xml'];
+                    if(!allowedTypes.includes(file.type)) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Format File Tidak Valid!',
+                            text: 'Hanya file JPEG, PNG, JPG, GIF, dan SVG yang diizinkan'
+                        });
+                        $(this).val('');
+                        return;
+                    }
+
                     const reader = new FileReader();
                     const input = $(this);
                     reader.onload = function(e) {
-                        const preview = `<img src="${e.target.result}" height="100" class="mt-2">`;
-                        input.closest('.form-group').find('img').not('[src^="/img/layanan/"]').remove();
+                        // Remove existing preview
+                        input.siblings('.preview-image').remove();
+
+                        const preview = `
+                            <div class="preview-image mt-2">
+                                <img src="${e.target.result}" height="100" class="img-thumbnail">
+                                <small class="d-block text-muted">Preview gambar baru</small>
+                            </div>
+                        `;
                         input.after(preview);
                     }
                     reader.readAsDataURL(file);

@@ -19,7 +19,7 @@
                 <h1>Edit Loket</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item">
-                        <a href="{{ route('lokets.index') }}">Data Loket</a>
+                        <a href="{{ route('Loket.index') }}">Data Loket</a>
                     </div>
                     <div class="breadcrumb-item">Edit Loket</div>
                 </div>
@@ -32,7 +32,7 @@
                             <h4>Edit Loket Form</h4>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('lokets.update', $loket->id) }}" method="POST" id="editForm">
+                            <form action="{{ route('Loket.update', $loket->id) }}" method="POST" id="editForm">
                                 @csrf
                                 @method('PUT')
 
@@ -82,7 +82,7 @@
                                     <button type="submit" class="btn btn-primary" id="saveBtn">
                                         <i class="fas fa-save"></i> Simpan Perubahan
                                     </button>
-                                    <a href="{{ route('lokets.index') }}" class="btn btn-secondary">
+                                    <a href="{{ route('Loket.index') }}" class="btn btn-secondary">
                                         <i class="fas fa-times"></i> Batal
                                     </a>
                                 </div>
@@ -99,6 +99,8 @@
     <!-- General JS Scripts -->
     <script src="{{ asset('library/jquery/dist/jquery.min.js') }}"></script>
     <script src="{{ asset('library/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('library/jquery.nicescroll/dist/jquery.nicescroll.min.js') }}"></script>
+
 
     <script>
         $(document).ready(function() {
@@ -122,7 +124,7 @@
                                 showConfirmButton: false,
                                 timer: 1500
                             }).then(() => {
-                                window.location.href = "{{ route('masterdata.loket') }}";
+                                window.location.href = "{{ route('Loket.index') }}";
                             });
                         }
                     },

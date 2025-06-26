@@ -225,11 +225,13 @@
         <section class="section">
             <div class="section-header">
                 <h1>Data Kategori Pemohon</h1>
-                <div class="section-header-button">
-                    <a href="{{ route('applicant-types.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Tambah Kategori
-                    </a>
-                </div>
+                @if(auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator'))
+                    <div class="section-header-button">
+                        <a href="{{ route('applicant-types.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Kategori
+                        </a>
+                    </div>
+                @endif
             </div>
 
             <div class="row">
@@ -292,6 +294,8 @@
 
     <script>
         $(document).ready(function() {
+            const isAuthorized = {{ auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator') ? 'true' : 'false' }};
+
             const table = $('#applicant-type-table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -322,7 +326,7 @@
                     {data: 'title', name: 'title'},
                     {data: 'image', name: 'image', orderable: false, searchable: false},
                     {data: 'created_at', name: 'created_at'},
-                    {data: 'actions', name: 'actions', orderable: false, searchable: false}
+                    {data: 'actions', name: 'actions', orderable: false, searchable: false, visible: isAuthorized}
                 ],
                 order: [[0, 'asc']],
                 responsive: true,

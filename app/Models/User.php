@@ -9,11 +9,13 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use App\Traits\Loggable;
 
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+    use Loggable;
 
     public $incrementing = false;
     protected $keyType = 'string';
@@ -29,14 +31,39 @@ class User extends Authenticatable
         'email',
         'username',
         'telp',
-        'email_verified_at',
-        'password',
         'role',
+        'nik',
+        'gender',
+        'address',
+        'rt',        // Make sure this exists
+        'rw',        // Make sure this exists
+        'kelurahan',
+        'kecamatan',
+        'kota',
+        'provinsi',
+        'kode_pos',  // Make sure this is max 5 chars in migration
+        'tempat_lahir',
+        'tanggal_lahir',
+        'status_perkawinan',
+        'pekerjaan',
+        'agama',
+        'password',
+        'email_verified_at'
     ];
 
     public function sessions()
     {
         return $this->hasMany(Session::class);
+    }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class, 'user_id', 'id');
+    }
+
+    public function loket()
+    {
+        return $this->hasOne(Loket::class);
     }
 
     public function getLoggedInDuration()

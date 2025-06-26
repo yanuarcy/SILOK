@@ -290,6 +290,8 @@
 
     <script>
         $(document).ready(function() {
+            const isAuthorized = {{ auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'Operator') ? 'true' : 'false' }};
+
             const table = $('#layanan-item-table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -315,7 +317,7 @@
                             return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
                         }
                     },
-                    {data: 'actions', orderable: false, searchable: false}
+                    {data: 'actions', orderable: false, searchable: false, visible: isAuthorized}
                 ],
                 responsive: true,
                 language: {

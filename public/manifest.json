@@ -1,0 +1,17 @@
+{
+    "name": "SILOK - Kelurahan Jemurwonosari",
+    "short_name": "SILOK",
+    "start_url": "/index.php",
+    "background_color": "#6777ef",
+    "description": "Sistem Informasi Layanan Online Kelurahan",
+    "display": "fullscreen",
+    "theme_color": "#6777ef",
+    "icons": [
+        {
+            "src": "logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

@@ -16,7 +16,8 @@ class IdGenerator
             ->first();
 
         if ($lastUser) {
-            $lastNumber = intval(substr($lastUser->id, 2));
+            $prefixLength = strlen(self::PREFIX . $prefix);
+            $lastNumber = intval(substr($lastUser->id, $prefixLength));
             $newNumber = $lastNumber + 1;
             return self::PREFIX . $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
         }
@@ -44,9 +45,25 @@ class IdGenerator
         return self::generate('Back Office', 'BO');
     }
 
-    public static function generateEditorId()
+    public static function generateOperatorId()
     {
-        return self::generate('Editor', 'E');
+        return self::generate('Operator', 'O');
+    }
+    public static function generateKetuaRTId()
+    {
+        return self::generate('Ketua RT', 'RT');
+    }
+    public static function generateKetuaRWId()
+    {
+        return self::generate('Ketua RW', 'RW');
+    }
+    public static function generateLurahId()
+    {
+        return self::generate('Lurah', 'L');
+    }
+    public static function generateCamatId()
+    {
+        return self::generate('Camat', 'C');
     }
 
     public static function generateId($role)
@@ -56,7 +73,11 @@ class IdGenerator
             'admin' => 'A',
             'Front Office' => 'FO',
             'Back Office' => 'BO',
-            'Editor' => 'E'
+            'Operator' => 'O',
+            'Ketua RT' => 'RT',
+            'Ketua RW' => 'RW',
+            'Lurah' => 'L',
+            'Camat' => 'C',
 
         ];
 

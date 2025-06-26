@@ -284,8 +284,8 @@
                             <div class="card-header">
                                 <h4>Jumlah Antrian</h4>
                             </div>
-                            <div class="card-body">
-                                10
+                            <div class="card-body" id="total-antrian">
+                                0
                             </div>
                         </div>
                     </div>
@@ -299,8 +299,8 @@
                             <div class="card-header">
                                 <h4>Antrian Sekarang</h4>
                             </div>
-                            <div class="card-body">
-                                42
+                            <div class="card-body" id="antrian-sekarang">
+                                Belum ada
                             </div>
                         </div>
                     </div>
@@ -314,8 +314,8 @@
                             <div class="card-header">
                                 <h4>Antrian Selanjutnya</h4>
                             </div>
-                            <div class="card-body">
-                                1,201
+                            <div class="card-body" id="antrian-selanjutnya">
+                                Belum ada
                             </div>
                         </div>
                     </div>
@@ -329,8 +329,8 @@
                             <div class="card-header">
                                 <h4>Sisa Antrian</h4>
                             </div>
-                            <div class="card-body">
-                                47
+                            <div class="card-body" id="sisa-antrian">
+                                0
                             </div>
                         </div>
                     </div>
@@ -341,6 +341,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h4>Data Antrian</h4>
+                            {{-- <input id="user-loket" value="{{ $UserLoket }}"> --}}
                         </div>
                         <div class="card-body">
                             {{-- Filter Buttons --}}
@@ -432,12 +433,104 @@
 
     <script>
 
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Fungsi untuk fetch dan update stats
+            async function updateDashboardStats() {
+                try {
+                    const response = await fetch('/adminduk/stats');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const stats = data.data;
+
+                        // Update langsung tanpa efek visual
+                        updateCardValue('total-antrian', stats.total_antrian || 0);
+                        updateCardValue('antrian-sekarang', stats.antrian_sekarang || 'Belum ada');
+                        updateCardValue('antrian-selanjutnya', stats.antrian_selanjutnya || 'Belum ada');
+                        updateCardValue('sisa-antrian', stats.antrian_menunggu || 0);
+
+                        // Reset error state jika sebelumnya error
+                        resetErrorState();
+
+                    } else {
+                        console.error('Failed to fetch stats:', data.message);
+                        showErrorState();
+                    }
+                } catch (error) {
+                    console.error('Error fetching dashboard stats:', error);
+                    showErrorState();
+                }
+            }
+
+            // Fungsi helper untuk update nilai card (tanpa efek visual)
+            function updateCardValue(elementId, value) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = value;
+                }
+            }
+
+            // Fungsi untuk menampilkan error state
+            function showErrorState() {
+                const cardIds = ['total-antrian', 'antrian-sekarang', 'antrian-selanjutnya', 'sisa-antrian'];
+                cardIds.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = 'Error';
+                        element.style.color = '#dc3545';
+                    }
+                });
+            }
+
+            // Reset error state
+            function resetErrorState() {
+                const cardIds = ['total-antrian', 'antrian-sekarang', 'antrian-selanjutnya', 'sisa-antrian'];
+                cardIds.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.style.color = ''; // Reset ke warna default
+                    }
+                });
+            }
+
+            // Initial load saat halaman dibuka
+            updateDashboardStats();
+
+            // Real-time update setiap 1 detik
+            setInterval(updateDashboardStats, 1000);
+
+            // Manual refresh function (bisa dipanggil dari button jika diperlukan)
+            window.refreshDashboard = function() {
+                updateDashboardStats();
+            };
+
+            // Optional: Tampilkan status koneksi
+            let isOnline = true;
+            window.addEventListener('online', () => {
+                isOnline = true;
+                console.log('Connection restored');
+                updateDashboardStats();
+            });
+
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                console.log('Connection lost');
+            });
+        });
+
         $(document).ready(function() {
             console.log('Script running...'); // Debugging
 
             // Default jenis antrian
             var jenisAntrian = 'Offline';
-            var loket = "2";
+            // var loket = "2";
+            // var loket = @json($userLoket ?? '8');
+            var loket = "{{ $userLoket ?? '1' }}"; // Ambil dari controller
+            // var user = "{{ $userID ?? '4' }}"; // Ambil dari controller
+            // var loket = document.getElementById('user-loket').value;
+            // console.log('Loket from controller:', loket);
+            // console.log('user id from user table:', user);
 
             // Function to mask the WhatsApp number
             function maskWhatsapp(number) {
@@ -463,17 +556,20 @@
                         width: '15%',
                         className: 'text-start',
                         render: function(data, type, row) {
-                            var loketNumber = row['calling_by'].match(/\d+/); // Extract the number from 'Loket X'
+                            // var loketNumber = row['calling_by'].match(/\d+/); // Extract the number from 'Loket X'
+                            var loketNumber = null;
+                            if (row.calling_by && row.calling_by.match(/Loket (\d+)/)) {
+                                loketNumber = row.calling_by.match(/Loket (\d+)/)[1];
+                            }
 
                             if (data === null || data === '' || data === '-') {
                                 return 'No Device';
                             }
                             if (jenisAntrian === 'Online') {
                                 // Logic for masking WhatsApp number
-                                if (loketNumber && loketNumber[0] === loket) {
+                                // Show full number if current loket is handling this antrian OR if already served
+                                if ((loketNumber && loketNumber === loket) || row.status === '1') {
                                     return data;
-                                } else if (row.calling_by === "") {
-                                    return maskWhatsapp(data); // Display masked number otherwise
                                 } else {
                                     return maskWhatsapp(data); // Display masked number otherwise
                                 }
@@ -498,48 +594,82 @@
                         data: 'calling_by',
                         width: '10%',
                         className: 'text-center calling-by-column',
-                        visible: false
+                        visible: false,
+                        render: function(data, type, row) {
+                            if (!data || data === '') {
+                                return '<span class="badge bg-secondary">Standby</span>';
+                            }
+
+                            // Extract loket number
+                            var loketMatch = data.match(/Loket (\d+)/);
+                            if (loketMatch) {
+                                var callingLoket = loketMatch[1];
+                                if (callingLoket === loket) {
+                                    return '<span class="badge bg-success">Loket ' + callingLoket + '</span>';
+                                } else {
+                                    return '<span class="badge bg-warning">Loket ' + callingLoket + '</span>';
+                                }
+                            }
+
+                            return '<span class="badge bg-info">' + data + '</span>';
+                        }
                     },
                     {
                         data: null,
                         width: '8%',
                         className: 'text-center aksi-column',
                         visible: false,
+                        orderable: false,
+                        searchable: false,
                         render: function(data, type, row) {
-                            var btnStatus;
-                            var loketNumber = data['calling_by'].match(/\d+/); // Extract the number from 'Loket X'
                             if (row.status === '') {
-                                btnStatus = "-";
-                            } else if (row.calling_by === '' || loketNumber && loketNumber[0] === loket) {
-                                var buttonText = row.calling_by === '' ? 'Call' : 'End Call';
-                                var buttonClass = row.calling_by === '' ? 'btn-call' : 'btn-end-call';
-                                return `<button class="btn ${buttonClass} btn-sm toggle-call">${buttonText}</button>`;
-                            } else {
-                                return '<button class="btn btn-success btn-sm toggle-call" disabled>On Call</button>';
+                                return "-";
                             }
 
-                            return btnStatus;
-                        },
-                        visible: false
+                            // JIKA SUDAH TERLAYANI (status = '1'), DISABLE TOMBOL CALL
+                            if (row.status === '1') {
+                                return '<button class="btn btn-secondary btn-sm" disabled>Selesai</button>';
+                            }
+
+                            // Extract loket number from calling_by field
+                            var callingLoket = null;
+                            if (row.calling_by && row.calling_by.match(/Loket (\d+)/)) {
+                                callingLoket = row.calling_by.match(/Loket (\d+)/)[1];
+                            }
+
+                            // Check if current loket has any active call
+                            if (!row.calling_by || row.calling_by === '') {
+                                // No one is calling this antrian - can call
+                                return '<button class="btn btn-success btn-sm btn-call" data-id="' + row.id + '" data-loket="' + loket + '">Call</button>';
+                            } else if (callingLoket === loket) {
+                                // Current loket is calling this antrian - can end call
+                                return '<button class="btn btn-danger btn-sm btn-end-call" data-id="' + row.id + '">End Call</button>';
+                            } else {
+                                // Another loket is calling this antrian - disabled
+                                return '<button class="btn btn-secondary btn-sm" disabled>On Call</button>';
+                            }
+                        }
                     },
                     {
                         data: null,
                         width: '8%',
                         className: 'text-center pr-4',
+                        orderable: false,
+                        searchable: false,
                         render: function(data, type, row) {
                             if (row.status === '') return '-';
 
                             if (jenisAntrian === 'Online') {
                                 if (row.status === '0') {
-                                    return '<button class="btn btn-primary btn-sm panggil">Kirim Pesan</button>';
+                                    return '<button class="btn btn-primary btn-sm panggil" data-id="' + row.id + '">Kirim Pesan</button>';
                                 }
-                                return '<button class="btn btn-secondary btn-sm panggil">Terlayani</button>';
+                                return '<button class="btn btn-secondary btn-sm" disabled>Terlayani</button>';
                             }
 
                             if (row.status === '0') {
-                                return '<button class="btn btn-success btn-sm panggil"><i class="bi-mic-fill">Panggil</i></button>';
+                                return '<button class="btn btn-success btn-sm panggil" data-id="' + row.id + '"><i class="bi-mic-fill"></i> Panggil</button>';
                             }
-                            return '<button class="btn btn-secondary btn-sm panggil"><i class="bi-mic-fill">Panggil Lagi</i></button>';
+                            return '<button class="btn btn-secondary btn-sm panggil" data-id="' + row.id + '"><i class="bi-mic-fill"></i> Panggil Lagi</button>';
                         }
                     }
                 ],
@@ -596,42 +726,142 @@
             });
 
             // Handle Call/End Call button clicks
-            $('#tabel-antrian').on('click', '.toggle-call', function() {
-                var data = table.row($(this).closest('tr')).data();
-                var $btn = $(this);
+            // $('#tabel-antrian').on('click', '.toggle-call', function() {
+            //     var data = table.row($(this).closest('tr')).data();
+            //     var $btn = $(this);
 
-                if ($btn.text() === 'Call') {
-                    $.ajax({
-                        url: "{{ route('antrian.call') }}",
-                        type: 'POST',
-                        data: {
-                            id: data.id,
-                            loket: loket,
-                            _token: "{{ csrf_token() }}"
-                        },
-                        success: function(response) {
-                            $btn.text('End Call').removeClass('btn-primary').addClass('btn-danger');
+            //     if ($btn.text() === 'Call') {
+            //         $.ajax({
+            //             url: "{{ route('antrian.call') }}",
+            //             type: 'POST',
+            //             data: {
+            //                 id: data.id,
+            //                 loket: loket,
+            //                 _token: "{{ csrf_token() }}"
+            //             },
+            //             success: function(response) {
+            //                 $btn.text('End Call').removeClass('btn-primary').addClass('btn-danger');
+            //                 table.ajax.reload();
+            //             }
+            //         });
+            //     } else if ($btn.text() === 'End Call') {
+            //         $.ajax({
+            //             url: "{{ route('antrian.end-call') }}",
+            //             type: 'POST',
+            //             data: {
+            //                 id: data.id,
+            //                 _token: "{{ csrf_token() }}"
+            //             },
+            //             success: function(response) {
+            //                 table.ajax.reload();
+            //             }
+            //         });
+            //     }
+            // });
+
+            $('#tabel-antrian').on('click', '.btn-call', function() {
+                var data = table.row($(this).closest('tr')).data();
+                var button = $(this);
+
+                // Disable button to prevent double clicks
+                button.prop('disabled', true);
+
+                $.ajax({
+                    url: "{{ route('antrian.call') }}",
+                    type: 'POST',
+                    data: {
+                        id: data.id,
+                        loket: loket,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if (response.success) {
                             table.ajax.reload();
+                            showNotification('success', 'Antrian berhasil dipanggil');
                         }
-                    });
-                } else if ($btn.text() === 'End Call') {
-                    $.ajax({
-                        url: "{{ route('antrian.end-call') }}",
-                        type: 'POST',
-                        data: {
-                            id: data.id,
-                            _token: "{{ csrf_token() }}"
-                        },
-                        success: function(response) {
+                    },
+                    error: function(xhr) {
+                        console.error('Call error:', xhr.responseText);
+                        showNotification('error', 'Terjadi kesalahan saat memanggil antrian');
+                    },
+                    complete: function() {
+                        button.prop('disabled', false);
+                    }
+                });
+            });
+
+            $('#tabel-antrian').on('click', '.btn-end-call', function() {
+                var data = table.row($(this).closest('tr')).data();
+                var button = $(this);
+
+                button.prop('disabled', true);
+
+                $.ajax({
+                    url: "{{ route('antrian.end-call') }}",
+                    type: 'POST',
+                    data: {
+                        id: data.id,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if (response.success) {
                             table.ajax.reload();
+                            showNotification('success', 'Panggilan berhasil diakhiri');
                         }
-                    });
-                }
+                    },
+                    error: function(xhr) {
+                        console.error('End call error:', xhr.responseText);
+                        showNotification('error', 'Terjadi kesalahan saat mengakhiri panggilan');
+                    },
+                    complete: function() {
+                        button.prop('disabled', false);
+                    }
+                });
             });
 
             // Handle Panggil/Kirim Pesan button clicks
+            // $('#tabel-antrian').on('click', '.panggil', function() {
+            //     var data = table.row($(this).closest('tr')).data();
+
+            //     if (jenisAntrian === 'Online') {
+            //         $.ajax({
+            //             url: "{{ route('antrian.kirim-pesan') }}",
+            //             type: 'POST',
+            //             data: {
+            //                 id: data.id,
+            //                 whatsapp: data.no_whatsapp,
+            //                 nama: data.nama,
+            //                 jenis_layanan: data.jenis_layanan,
+            //                 keterangan: data.keterangan,
+            //                 no_antrian: data.no_antrian,
+            //                 _token: "{{ csrf_token() }}"
+            //             },
+            //             success: function(response) {
+            //                 table.ajax.reload();
+            //             }
+            //         });
+            //     } else {
+            //         $.ajax({
+            //             url: "{{ route('antrian.panggil') }}",
+            //             type: 'POST',
+            //             data: {
+            //                 id: data.id,
+            //                 no_antrian: data.no_antrian,
+            //                 loket: loket,
+            //                 _token: "{{ csrf_token() }}"
+            //             },
+            //             success: function(response) {
+            //                 table.ajax.reload();
+            //             }
+            //         });
+            //     }
+            // });
+
             $('#tabel-antrian').on('click', '.panggil', function() {
                 var data = table.row($(this).closest('tr')).data();
+                var button = $(this);
+
+                button.prop('disabled', true);
 
                 if (jenisAntrian === 'Online') {
                     $.ajax({
@@ -647,7 +877,17 @@
                             _token: "{{ csrf_token() }}"
                         },
                         success: function(response) {
-                            table.ajax.reload();
+                            if (response.success) {
+                                table.ajax.reload();
+                                showNotification('success', response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Kirim pesan error:', xhr.responseText);
+                            showNotification('error', 'Terjadi kesalahan saat mengirim pesan');
+                        },
+                        complete: function() {
+                            button.prop('disabled', false);
                         }
                     });
                 } else {
@@ -661,11 +901,41 @@
                             _token: "{{ csrf_token() }}"
                         },
                         success: function(response) {
-                            table.ajax.reload();
+                            if (response.success) {
+                                table.ajax.reload();
+                                showNotification('success', 'Antrian berhasil dipanggil');
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Panggil error:', xhr.responseText);
+                            showNotification('error', 'Terjadi kesalahan saat memanggil antrian');
+                        },
+                        complete: function() {
+                            button.prop('disabled', false);
                         }
                     });
                 }
             });
+
+            function showNotification(type, message) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: type === 'success' ? 'success' : 'error',
+                        title: message,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    // Fallback to alert or console
+                    if (type === 'success') {
+                        console.log('Success:', message);
+                    } else {
+                        console.error('Error:', message);
+                    }
+                }
+            }
 
             setInterval(function() {
                 // $('#jumlah-antrian').load('get_jumlah_antrian.php').fadeIn("slow");

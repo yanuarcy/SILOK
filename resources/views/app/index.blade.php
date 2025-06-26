@@ -183,6 +183,51 @@
     <!-- Page Specific JS File -->
     <script src="{{ asset('js/page/index-0.js') }}"></script>
 
+    @auth
+        @if(session('needs_profile_update'))
+            <script>
+                $(document).ready(function() {
+                    // Show profile update alert for RT/RW roles
+                    const profileRole = '{{ session('profile_role') }}';
+                    const roleText = profileRole === 'Ketua RT' ? 'RT' : 'RW';
+
+                    Swal.fire({
+                        title: 'Lengkapi Profil Anda',
+                        html: `
+                            <div class="text-left">
+                                <p>Sebagai <strong>${profileRole}</strong>, Anda perlu melengkapi informasi profil terlebih dahulu.</p>
+                                <p>Mohon isi informasi <strong>${roleText}</strong> pada profil Anda untuk dapat menggunakan sistem dengan optimal.</p>
+                                <hr>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Informasi ini diperlukan untuk proses persetujuan dokumen PUNTADEWA
+                                </small>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="fas fa-user-edit"></i> Lengkapi Profil',
+                        cancelButtonText: 'Nanti Saja',
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#6c757d',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        customClass: {
+                            confirmButton: 'btn btn-primary me-2',
+                            cancelButton: 'btn btn-secondary'
+                        },
+                        buttonsStyling: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Redirect to profile page and focus on RT/RW input
+                            window.location.href = '{{ route('Profile.index') }}?focus=' + roleText.toLowerCase();
+                        }
+                    });
+                });
+            </script>
+        @endif
+    @endauth
+
     <!-- Template JS File -->
     <script src="{{ asset('js/scripts.js') }}"></script>
     <script src="{{ asset('js/custom.js') }}"></script>

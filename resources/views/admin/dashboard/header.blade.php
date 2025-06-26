@@ -256,12 +256,12 @@
                     class="dropdown-item has-icon {{ $type_menu === 'profile' ? 'active' : '' }}">
                     <i class="far fa-user"></i> Profile
                 </a>
-                <a href="features-activities.html"
+                <a href="{{ route('activities.index') }}"
                     class="dropdown-item has-icon">
                     <i class="fas fa-bolt"></i> Activities
                 </a>
-                <a href="features-settings.html"
-                    class="dropdown-item has-icon">
+                <a href="{{ route('settings.index') }}"
+                    class="dropdown-item has-icon {{ $type_menu === 'Settings' ? 'active' : '' }}">
                     <i class="fas fa-cog"></i> Settings
                 </a>
                 <div class="dropdown-divider"></div>
